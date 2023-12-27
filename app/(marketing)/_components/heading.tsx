@@ -1,11 +1,14 @@
 "use client";
 
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
+import { SignInButton } from "@clerk/clerk-react";
+import { useConvexAuth } from "convex/react";
 import Image from "next/image";
-
-import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const Heading = () => {
+  const { isAuthenticated, isLoading } = useConvexAuth();
   return (
     <div className="max-w-3xl space-y-4">
       <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
@@ -30,10 +33,29 @@ const Heading = () => {
         </h3>
       </div>
 
-      <Button className="gap-2">
-        <Image src="/logo-dark.svg" width="28" height="28" alt="Logo" />
-        Enter Harmony
-      </Button>
+      {isLoading && (
+        <div className="w-full flex items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      )}
+
+      {isAuthenticated && !isLoading && (
+        <Button asChild className="gap-2">
+          <Link href="/documents">
+            <Image src="/logo-dark.svg" width="28" height="28" alt="Logo" />
+            Enter Harmony
+          </Link>
+        </Button>
+      )}
+
+      {!isAuthenticated && !isLoading && (
+        <SignInButton mode="modal">
+          <Button className="gap-2">
+            <Image src="/logo-dark.svg" width="28" height="28" alt="Logo" />
+            Get Harmony
+          </Button>
+        </SignInButton>
+      )}
     </div>
   );
 };
