@@ -26,7 +26,7 @@ const DocumentsPage = () => {
   return (
     <div className="h-full flex flex-col items-center justify-center space-y-4">
       <Image
-        src="/pen1.png"
+        src="/start.svg"
         height="300"
         width="300"
         alt="Empty"
