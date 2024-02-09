@@ -34,7 +34,7 @@ const DocumentsPage = () => {
       />
 
       <Image
-        src="/pen-dark.png"
+        src="/start-dark.svg"
         height="300"
         width="300"
         alt="Empty"
