@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/popover";
 
 import { useSearch } from "@/hooks/use-search";
+import { useSettings } from "@/hooks/use-settings";
 
 import { UserItem } from "./user-item";
 import { Item } from "./item";
@@ -32,6 +33,7 @@ import { DocumentList } from "./document-list";
 import TrashBox from "./trash-box";
 
 export const Navigation = () => {
+  const settings = useSettings();
   const search = useSearch();
 
   const pathname = usePathname();
@@ -164,7 +166,7 @@ export const Navigation = () => {
         <div>
           <UserItem />
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
-          <Item label="Settings" icon={Settings} onClick={() => {}} />
+          <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
           <Item onClick={handleCreate} label="New Page" icon={PlusCircle} />
         </div>
 
