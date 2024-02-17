@@ -25,10 +25,26 @@ const Heading = () => {
       <div className="py-6">
         <h3 className="text-base sm:text-xl md:text-2xl font-medium">
           Experience the power of{" "}
-          <span className="bg-green-200 px-1 text-black italic">writing</span>,{" "}
-          <span className="bg-blue-200 px-1 text-black italic">planning</span>,
-          and{" "}
-          <span className="bg-orange-200 px-1 text-black italic">sharing</span>{" "}
+          <span
+            style={{ backgroundColor: "hsl(140deg 100% 50%)" }}
+            className="px-1 text-black italic"
+          >
+            writing
+          </span>
+          ,{" "}
+          <span
+            style={{ backgroundColor: "hsl(50deg, 100%, 50%)" }}
+            className="px-1 text-black italic"
+          >
+            planning
+          </span>
+          , and{" "}
+          <span
+            style={{ backgroundColor: "hsl(190deg 100% 50%)" }}
+            className="bg-orange-200 px-1 text-black italic"
+          >
+            sharing
+          </span>{" "}
           your work, all while being supported by an AI companion
         </h3>
       </div>
@@ -40,20 +56,18 @@ const Heading = () => {
       )}
 
       {isAuthenticated && !isLoading && (
-        <Button asChild className="gap-2">
-          <Link href="/documents">
-            <Image src="/logo-dark.svg" width="28" height="28" alt="Logo" />
+        <Link href="/documents" className="gap-2">
+          <button className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
             Enter Harmony
-          </Link>
-        </Button>
+          </button>
+        </Link>
       )}
 
       {!isAuthenticated && !isLoading && (
         <SignInButton mode="modal">
-          <Button className="gap-2">
-            <Image src="/logo-dark.svg" width="28" height="28" alt="Logo" />
+          <button className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
             Get Harmony
-          </Button>
+          </button>
         </SignInButton>
       )}
     </div>
