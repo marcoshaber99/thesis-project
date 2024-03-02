@@ -13,7 +13,7 @@ export const Footer = () => {
           Privacy Policy
         </Button>
         <Button variant="ghost" size="sm">
-          Terms & Conditions
+          Marco Haber
         </Button>
       </div>
     </div>
