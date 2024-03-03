@@ -7,46 +7,17 @@ import { useConvexAuth } from "convex/react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+
+const words = `Elevate Your Workflow with AI-Powered Assistance and Collaboration`;
 
 const Heading = () => {
-  const words = [
-    {
-      text: "Elevate",
-    },
-    {
-      text: "Your",
-    },
-    {
-      text: "Workflow",
-    },
-    {
-      text: "with",
-    },
-    {
-      text: "AI-Powered",
-      className:
-        "text-blue-500 dark:text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300",
-    },
-    {
-      text: "Assistance",
-    },
-    {
-      text: "and",
-    },
-    {
-      text: "Collaboration",
-      className:
-        "text-blue-500 dark:text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300",
-    },
-  ];
-
   const { isAuthenticated, isLoading } = useConvexAuth();
   return (
     <div className="max-w-3xl space-y-4">
       <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
         Welcome To{" "}
-        <span className="inline-block text-3xl sm:text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-600 dark:bg-gradient-to-r from-blue-400 to-cyan-300">
+        <span className="inline-block text-3xl sm:text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-600 dark:from-cyan-400 dark:to-green-300">
           Harmony
         </span>
       </h1>
@@ -55,10 +26,10 @@ const Heading = () => {
         <Image src="./logo.svg" width="200" height="100" alt="Logo" />
       </div>
 
-      <div className="py-3">
-        <h3 className="text-base sm:text-xl md:text-2xl font-medium">
-          <TypewriterEffectSmooth words={words} />
-        </h3>
+      <div className="py-3 ">
+        <h4>
+          <TextGenerateEffect words={words} />{" "}
+        </h4>
       </div>
 
       {isLoading && (
