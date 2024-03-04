@@ -7,10 +7,6 @@ import { useConvexAuth } from "convex/react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
-
-const words = `Elevate Your Workflow with AI-Powered Assistance and Collaboration`;
-
 const Heading = () => {
   const { isAuthenticated, isLoading } = useConvexAuth();
   return (
@@ -26,10 +22,17 @@ const Heading = () => {
         <Image src="./logo.svg" width="200" height="100" alt="Logo" />
       </div>
 
-      <div className="py-3 ">
-        <h4>
-          <TextGenerateEffect words={words} />{" "}
-        </h4>
+      <div className="text-center">
+        <p className="mt-6 mb-8 text-lg leading-8 text-gray-700 dark:text-gray-200">
+          Elevate Your Workflow with{" "}
+          <span className="text-blue-500 leading-snug font-semibold dark:text-blue-300">
+            AI-Powered
+          </span>{" "}
+          Assistance and{" "}
+          <span className="text-blue-500 leading-snug font-semibold dark:text-blue-300">
+            Collaboration
+          </span>{" "}
+        </p>
       </div>
 
       {isLoading && (
@@ -49,7 +52,7 @@ const Heading = () => {
       {!isAuthenticated && !isLoading && (
         <SignInButton mode="modal">
           <button className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
-            Get Harmony
+            Get Started
           </button>
         </SignInButton>
       )}
