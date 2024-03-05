@@ -1,6 +1,5 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { title } from "process";
 
 export default defineSchema({
   documents: defineTable({
@@ -12,7 +11,22 @@ export default defineSchema({
     coverImage: v.optional(v.string()),
     icon: v.optional(v.string()),
     isPublished: v.boolean(),
+    editors: v.optional(v.array(v.string())),
   })
     .index("by_user", ["userId"])
-    .index("by_user_parent", ["userId", "parentDocument"]),
+    .index("by_user_parent", ["userId", "parentDocument"])
+    .searchIndex("search_content", {
+      searchField: "content",
+      filterFields: ["userId", "isArchived", "isPublished"],
+    }),
+
+  presence: defineTable({
+    user: v.string(),
+    room: v.string(),
+    updated: v.number(),
+    data: v.any(),
+    picture: v.optional(v.string()),
+  })
+    .index("by_room_updated", ["room", "updated"])
+    .index("by_user_room", ["user", "room"]),
 });
