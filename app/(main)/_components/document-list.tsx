@@ -1,13 +1,15 @@
 "use client";
 
-import { api } from "@/convex/_generated/api";
-import { Doc, Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Item } from "./item";
-import { cn } from "@/lib/utils";
+import { useQuery } from "convex/react";
 import { FileIcon } from "lucide-react";
+
+import { Doc, Id } from "@/convex/_generated/dataModel";
+import { api } from "@/convex/_generated/api";
+import { cn } from "@/lib/utils";
+
+import { Item } from "./item";
 
 interface DocumentListProps {
   parentDocumentId?: Id<"documents">;
@@ -24,7 +26,10 @@ export const DocumentList = ({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const onExpand = (documentId: string) => {
-    setExpanded((prev) => ({ ...prev, [documentId]: !prev[documentId] }));
+    setExpanded((prevExpanded) => ({
+      ...prevExpanded,
+      [documentId]: !prevExpanded[documentId],
+    }));
   };
 
   const documents = useQuery(api.documents.getSidebar, {
@@ -61,9 +66,8 @@ export const DocumentList = ({
           level === 0 && "hidden"
         )}
       >
-        No Pages inside
+        No pages inside
       </p>
-
       {documents.map((document) => (
         <div key={document._id}>
           <Item
@@ -74,10 +78,9 @@ export const DocumentList = ({
             documentIcon={document.icon}
             active={params.documentId === document._id}
             level={level}
-            expanded={expanded[document._id]}
             onExpand={() => onExpand(document._id)}
+            expanded={expanded[document._id]}
           />
-
           {expanded[document._id] && (
             <DocumentList parentDocumentId={document._id} level={level + 1} />
           )}
