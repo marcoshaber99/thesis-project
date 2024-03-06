@@ -3,14 +3,11 @@
 import {
   ChevronsLeft,
   MenuIcon,
-  PenBox,
   Plus,
   PlusCircle,
   Search,
   Settings,
   Trash,
-  FolderSearch,
-  HeartHandshake,
 } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
@@ -31,14 +28,12 @@ import { useSettings } from "@/hooks/use-settings";
 import { UserItem } from "./user-item";
 import { Item } from "./item";
 import { DocumentList } from "./document-list";
-import TrashBox from "./trash-box";
+import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
-import { useNewEditor } from "@/hooks/use-new-editor";
 
 export const Navigation = () => {
   const router = useRouter();
   const settings = useSettings();
-  const newEditor = useNewEditor();
   const search = useSearch();
   const params = useParams();
   const pathname = usePathname();
@@ -161,24 +156,6 @@ export const Navigation = () => {
         <div>
           <UserItem />
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
-          <Item
-            label="Deep Search"
-            icon={FolderSearch}
-            onClick={() => {
-              router.push("/search");
-            }}
-          />
-          {params.documentId && (
-            <Item label="Add Editor" icon={PenBox} onClick={newEditor.onOpen} />
-          )}
-          <Item
-            label="Shared Projects"
-            icon={HeartHandshake}
-            onClick={() => {
-              router.push("/collaborative");
-            }}
-          />
-
           <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
           <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
         </div>

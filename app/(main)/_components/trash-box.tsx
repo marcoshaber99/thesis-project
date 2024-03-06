@@ -1,17 +1,18 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useQuery, useMutation } from "convex/react";
+import { Search, Trash, Undo } from "lucide-react";
+import { toast } from "sonner";
 
 import { api } from "@/convex/_generated/api";
-import { useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import { toast } from "sonner";
 import { Spinner } from "@/components/spinner";
-import { Search, Trash, Undo } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
-export default function TrashBox() {
+
+export const TrashBox = () => {
   const router = useRouter();
   const params = useParams();
   const documents = useQuery(api.documents.getTrash);
@@ -38,7 +39,7 @@ export default function TrashBox() {
     toast.promise(promise, {
       loading: "Restoring note...",
       success: "Note restored!",
-      error: "Failed to restore",
+      error: " Failed to restore note.",
     });
   };
 
@@ -47,8 +48,8 @@ export default function TrashBox() {
 
     toast.promise(promise, {
       loading: "Deleting note...",
-      success: "Note Deleted!",
-      error: "Failed to delete note",
+      success: "Note deleted!",
+      error: " Failed to delete note.",
     });
 
     if (params.documentId === documentId) {
@@ -70,16 +71,15 @@ export default function TrashBox() {
         <Search className="h-4 w-4" />
         <Input
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           className="h-7 px-2 focus-visible:ring-transparent bg-secondary"
-          placeholder="Filter by page title"
+          placeholder="Filter by page title..."
         />
       </div>
       <div className="mt-2 px-1 pb-1">
         <p className="hidden last:block text-xs text-center text-muted-foreground pb-2">
-          No documents found
+          No documents found.
         </p>
-
         {filteredDocuments?.map((document) => (
           <div
             key={document._id}
@@ -88,10 +88,9 @@ export default function TrashBox() {
             className="text-sm rounded-sm w-full hover:bg-primary/5 flex items-center text-primary justify-between"
           >
             <span className="truncate pl-2">{document.title}</span>
-
             <div className="flex items-center">
               <div
-                onClick={(event) => onRestore(event, document._id)}
+                onClick={(e) => onRestore(e, document._id)}
                 role="button"
                 className="rounded-sm p-2 hover:bg-neutral-200 dark:hover:bg-neutral-600"
               >
@@ -111,4 +110,4 @@ export default function TrashBox() {
       </div>
     </div>
   );
-}
+};
