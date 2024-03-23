@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import { ConvexReactClient, Authenticated, AuthLoading } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ClerkProvider, useAuth } from "@clerk/clerk-react";
-import Image from "next/image";
 
 interface ConvexClientProviderProps {
   children: React.ReactNode;
