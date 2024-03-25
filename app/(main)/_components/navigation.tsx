@@ -2,6 +2,7 @@
 
 import {
   ChevronsLeft,
+  LockIcon,
   MenuIcon,
   Plus,
   PlusCircle,
@@ -30,6 +31,8 @@ import { Item } from "./item";
 import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
+import { NewButton } from "./new-button";
+import { List } from "./list";
 
 export const Navigation = () => {
   const router = useRouter();
@@ -158,10 +161,13 @@ export const Navigation = () => {
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
           <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
           <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
+          <NewButton />
         </div>
         <div className="mt-4">
+          <Item label="Private" icon={LockIcon} />
           <DocumentList />
           <Item onClick={handleCreate} icon={Plus} label="Add a page" />
+          <List />
           <Popover>
             <PopoverTrigger className="w-full mt-4">
               <Item label="Trash" icon={Trash} />
