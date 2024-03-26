@@ -3,7 +3,7 @@
 import { useConvexAuth } from "convex/react";
 import { redirect } from "next/navigation";
 
-// import { Spinner } from "@/components/spinner";
+import { Spinner } from "@/components/spinner";
 import { SearchCommand } from "@/components/search-command";
 
 import { Navigation } from "./_components/navigation";
@@ -15,14 +15,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <Image
-          src="/logo.svg"
-          alt="Harmony Logo"
-          width={120}
-          height={120}
-          className="animate-pulse duration-700"
-        />
-        {/* <Spinner size="lg" /> */}
+        <Spinner size="lg" />
       </div>
     );
   }
