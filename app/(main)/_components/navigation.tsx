@@ -1,10 +1,8 @@
 "use client";
 
-import { useOrganization } from "@clerk/nextjs";
-
 import {
   ChevronsLeft,
-  LockIcon,
+  HeartHandshake,
   MenuIcon,
   Plus,
   PlusCircle,
@@ -33,15 +31,10 @@ import { Item } from "./item";
 import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
-import { NewButton } from "./new-button";
-import { List } from "./list";
-import { ManageOrganizations } from "./manage-org";
 
 export const Navigation = () => {
   const router = useRouter();
   const settings = useSettings();
-  const { organization } = useOrganization();
-
   const search = useSearch();
   const params = useParams();
   const pathname = usePathname();
@@ -53,7 +46,6 @@ export const Navigation = () => {
   const navbarRef = useRef<ElementRef<"div">>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
-  const { invitations, isLoaded } = useOrganization({ invitations: {} });
 
   useEffect(() => {
     if (isMobile) {
@@ -147,7 +139,7 @@ export const Navigation = () => {
       <aside
         ref={sidebarRef}
         className={cn(
-          "group/sidebar h-full bg-secondary overflow-y-auto relative flex w-60 flex-col",
+          "group/sidebar h-full bg-secondary overflow-y-auto relative flex w-60 flex-col z-[99999]",
           isResetting && "transition-all ease-in-out duration-300",
           isMobile && "w-0"
         )}
@@ -167,16 +159,8 @@ export const Navigation = () => {
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
           <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
           <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
-          <NewButton />
-          <ManageOrganizations />
-          {organization && (
-            <>
-              <List />
-            </>
-          )}
         </div>
         <div className="mt-4">
-          <Item label="Private" icon={LockIcon} />
           <DocumentList />
           <Item onClick={handleCreate} icon={Plus} label="Add a page" />
           <Popover>

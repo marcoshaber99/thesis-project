@@ -11,9 +11,7 @@ export default defineSchema({
     coverImage: v.optional(v.string()),
     icon: v.optional(v.string()),
     isPublished: v.boolean(),
-    orgId: v.optional(v.string()),
   })
     .index("by_user", ["userId"])
-    .index("by_user_parent", ["userId", "parentDocument"])
-    .index("by_organization", ["orgId"]),
+    .index("by_user_parent", ["userId", "parentDocument"]),
 });
