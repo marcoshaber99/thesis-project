@@ -1,4 +1,3 @@
-/* trunk-ignore-all(prettier) */
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -11,7 +10,6 @@ import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
 import { Item } from "./item";
-import { OrganizationProfile, useOrganizationList } from "@clerk/nextjs";
 
 interface DocumentListProps {
   parentDocumentId?: Id<"documents">;
@@ -23,11 +21,6 @@ export const DocumentList = ({
   parentDocumentId,
   level = 0,
 }: DocumentListProps) => {
-  const { userMemberships } = useOrganizationList({
-    userMemberships: {
-      infinite: true,
-    },
-  });
   const params = useParams();
   const router = useRouter();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
