@@ -54,20 +54,25 @@ export const archive = mutation({
 export const getSidebar = query({
   args: {
     parentDocument: v.optional(v.id("documents")),
+    organizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
     const userId = identity.subject;
 
     const documents = await ctx.db
       .query("documents")
-      .withIndex("by_user_parent", (q) =>
-        q.eq("userId", userId).eq("parentDocument", args.parentDocument)
+      .withIndex(
+        args.organizationId ? "by_organization_parent" : "by_user_parent",
+        (q) =>
+          args.organizationId
+            ? q
+                .eq("organizationId", args.organizationId)
+                .eq("parentDocument", args.parentDocument)
+            : q.eq("userId", userId).eq("parentDocument", args.parentDocument)
       )
       .filter((q) => q.eq(q.field("isArchived"), false))
       .order("desc")
@@ -76,11 +81,11 @@ export const getSidebar = query({
     return documents;
   },
 });
-
 export const create = mutation({
   args: {
     title: v.string(),
     parentDocument: v.optional(v.id("documents")),
+    organizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -90,6 +95,14 @@ export const create = mutation({
     }
 
     const userId = identity.subject;
+    let organizationId = args.organizationId;
+
+    if (args.parentDocument) {
+      const parentDocument = await ctx.db.get(args.parentDocument);
+      if (parentDocument) {
+        organizationId = parentDocument.organizationId || organizationId;
+      }
+    }
 
     const document = await ctx.db.insert("documents", {
       title: args.title,
@@ -97,6 +110,7 @@ export const create = mutation({
       userId,
       isArchived: false,
       isPublished: false,
+      organizationId,
     });
 
     return document;
