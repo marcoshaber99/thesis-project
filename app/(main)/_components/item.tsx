@@ -36,6 +36,7 @@ interface ItemProps {
   label: string;
   onClick?: () => void;
   icon: LucideIcon;
+  organizationId?: string;
 }
 
 export const Item = ({
@@ -49,6 +50,7 @@ export const Item = ({
   level = 0,
   onExpand,
   expanded,
+  organizationId,
 }: ItemProps) => {
   const { user } = useUser();
   const router = useRouter();
@@ -73,18 +75,21 @@ export const Item = ({
     event.stopPropagation();
     onExpand?.();
   };
-
   const onCreate = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
+
     if (!id) return;
-    const promise = create({ title: "Untitled", parentDocument: id }).then(
-      (documentId) => {
-        if (!expanded) {
-          onExpand?.();
-        }
-        router.push(`/documents/${documentId}`);
+
+    const promise = create({
+      title: "Untitled",
+      parentDocument: id,
+      organizationId: organizationId || undefined,
+    }).then((documentId) => {
+      if (!expanded) {
+        onExpand?.();
       }
-    );
+      router.push(`/documents/${documentId}`);
+    });
 
     toast.promise(promise, {
       loading: "Creating a new note...",
