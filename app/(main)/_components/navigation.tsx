@@ -3,19 +3,23 @@
 import {
   ChevronsLeft,
   HeartHandshake,
+  Lock,
   MenuIcon,
   Plus,
   PlusCircle,
+  PlusSquare,
   Search,
   Settings,
   Trash,
+  Users,
 } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import { useMutation } from "convex/react";
 import { toast } from "sonner";
-
+import { useOrganizationList } from "@clerk/nextjs";
+import { OrganizationSwitcher } from "@clerk/nextjs";
+import { useMutation } from "convex/react";
 import { cn } from "@/lib/utils";
 import { api } from "@/convex/_generated/api";
 import {
@@ -33,6 +37,12 @@ import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
 
 export const Navigation = () => {
+  const { userMemberships } = useOrganizationList({
+    userMemberships: {
+      infinite: true,
+    },
+  });
+
   const router = useRouter();
   const settings = useSettings();
   const search = useSearch();
@@ -122,11 +132,11 @@ export const Navigation = () => {
     }
   };
 
-  const handleCreate = () => {
-    const promise = create({ title: "Untitled" }).then((documentId) =>
-      router.push(`/documents/${documentId}`)
-    );
-
+  const handleCreate = (organizationId?: string) => {
+    const promise = create({
+      title: "Untitled",
+      organizationId: organizationId || undefined,
+    }).then((documentId) => router.push(`/documents/${documentId}`));
     toast.promise(promise, {
       loading: "Creating a new note...",
       success: "New note created!",
@@ -158,22 +168,72 @@ export const Navigation = () => {
           <UserItem />
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
           <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
-          <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
+          <Item
+            onClick={() => handleCreate()}
+            label="New page"
+            icon={PlusSquare}
+          />
+
+          <OrganizationSwitcher
+            afterCreateOrganizationUrl="/documents"
+            afterLeaveOrganizationUrl="/documents"
+            createOrganizationMode="modal"
+            organizationProfileMode="modal"
+            hidePersonal
+            appearance={{
+              elements: {
+                rootBox: {
+                  marginLeft: "5px",
+                },
+                organizationSwitcherTrigger: {
+                  padding: "6px",
+                  width: "100%",
+                  borderRadius: "8px",
+                  border: "1px solid #E5E7EB",
+                  justifyContent: "space-between",
+                  backgroundColor: "#fef8f2",
+                },
+              },
+            }}
+          />
         </div>
-        <div className="mt-4">
-          <DocumentList />
-          <Item onClick={handleCreate} icon={Plus} label="Add a page" />
-          <Popover>
-            <PopoverTrigger className="w-full mt-4">
-              <Item label="Trash" icon={Trash} />
-            </PopoverTrigger>
-            <PopoverContent
-              className="p-0 w-72"
-              side={isMobile ? "bottom" : "right"}
-            >
-              <TrashBox />
-            </PopoverContent>
-          </Popover>
+        <div className="mt-2">
+          <div className="hover:bg-sky-50">
+            <Item label="Organizations" icon={Users} />
+          </div>
+          {userMemberships?.data?.map((mem) => (
+            <div key={mem.organization.id} className="ml-1">
+              <Item label={mem.organization.name} icon={HeartHandshake} />
+              <DocumentList organizationId={mem.organization.id} />
+              <Item
+                onClick={() => handleCreate(mem.organization.id)}
+                icon={Plus}
+                label="Add a page"
+              />
+            </div>
+          ))}
+          <div className="mt-4">
+            <div className=" hover:bg-orange-50">
+              <Item label="Private" icon={Lock} />
+            </div>
+            <DocumentList isPrivate /> {/* Add the isPrivate prop */}
+            <Item
+              onClick={() => handleCreate()}
+              icon={Plus}
+              label="Add a page"
+            />
+            <Popover>
+              <PopoverTrigger className="w-full mt-4">
+                <Item label="Trash" icon={Trash} />
+              </PopoverTrigger>
+              <PopoverContent
+                className="p-0 w-72"
+                side={isMobile ? "bottom" : "right"}
+              >
+                <TrashBox />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
         <div
           onMouseDown={handleMouseDown}

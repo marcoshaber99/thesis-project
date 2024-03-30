@@ -54,20 +54,25 @@ export const archive = mutation({
 export const getSidebar = query({
   args: {
     parentDocument: v.optional(v.id("documents")),
+    organizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
     const userId = identity.subject;
 
     const documents = await ctx.db
       .query("documents")
-      .withIndex("by_user_parent", (q) =>
-        q.eq("userId", userId).eq("parentDocument", args.parentDocument)
+      .withIndex(
+        args.organizationId ? "by_organization_parent" : "by_user_parent",
+        (q) =>
+          args.organizationId
+            ? q
+                .eq("organizationId", args.organizationId)
+                .eq("parentDocument", args.parentDocument)
+            : q.eq("userId", userId).eq("parentDocument", args.parentDocument)
       )
       .filter((q) => q.eq(q.field("isArchived"), false))
       .order("desc")
@@ -77,13 +82,20 @@ export const getSidebar = query({
   },
 });
 
-export const create = mutation({
-  args: {
-    title: v.string(),
-    parentDocument: v.optional(v.id("documents")),
-  },
+export const getById = query({
+  args: { documentId: v.id("documents") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
+
+    const document = await ctx.db.get(args.documentId);
+
+    if (!document) {
+      throw new Error("Not found");
+    }
+
+    if (document.isPublished && !document.isArchived) {
+      return document;
+    }
 
     if (!identity) {
       throw new Error("Not authenticated");
@@ -91,12 +103,41 @@ export const create = mutation({
 
     const userId = identity.subject;
 
+    if (document.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    return document;
+  },
+});
+export const create = mutation({
+  args: {
+    title: v.string(),
+    parentDocument: v.optional(v.id("documents")),
+    organizationId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    let organizationId = args.organizationId;
+
+    if (args.parentDocument) {
+      const parentDocument = await ctx.db.get(args.parentDocument);
+      if (parentDocument) {
+        organizationId = parentDocument.organizationId || organizationId;
+      }
+    }
     const document = await ctx.db.insert("documents", {
       title: args.title,
       parentDocument: args.parentDocument,
       userId,
       isArchived: false,
       isPublished: false,
+      organizationId,
     });
 
     return document;
@@ -229,35 +270,6 @@ export const getSearch = query({
   },
 });
 
-export const getById = query({
-  args: { documentId: v.id("documents") },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    const document = await ctx.db.get(args.documentId);
-
-    if (!document) {
-      throw new Error("Not found");
-    }
-
-    if (document.isPublished && !document.isArchived) {
-      return document;
-    }
-
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    const userId = identity.subject;
-
-    if (document.userId !== userId) {
-      throw new Error("Unauthorized");
-    }
-
-    return document;
-  },
-});
-
 export const update = mutation({
   args: {
     id: v.id("documents"),
@@ -268,24 +280,10 @@ export const update = mutation({
     isPublished: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error("Unauthenticated");
-    }
-
-    const userId = identity.subject;
-
     const { id, ...rest } = args;
-
     const existingDocument = await ctx.db.get(args.id);
-
     if (!existingDocument) {
       throw new Error("Not found");
-    }
-
-    if (existingDocument.userId !== userId) {
-      throw new Error("Unauthorized");
     }
 
     const document = await ctx.db.patch(args.id, {

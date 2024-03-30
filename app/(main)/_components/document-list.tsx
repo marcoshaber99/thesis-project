@@ -15,9 +15,13 @@ interface DocumentListProps {
   parentDocumentId?: Id<"documents">;
   level?: number;
   data?: Doc<"documents">[];
+  organizationId?: string;
+  isPrivate?: boolean;
 }
 
 export const DocumentList = ({
+  organizationId,
+  isPrivate = false,
   parentDocumentId,
   level = 0,
 }: DocumentListProps) => {
@@ -34,6 +38,7 @@ export const DocumentList = ({
 
   const documents = useQuery(api.documents.getSidebar, {
     parentDocument: parentDocumentId,
+    organizationId,
   });
 
   const onRedirect = (documentId: string) => {
@@ -68,24 +73,31 @@ export const DocumentList = ({
       >
         No pages inside
       </p>
-      {documents.map((document) => (
-        <div key={document._id}>
-          <Item
-            id={document._id}
-            onClick={() => onRedirect(document._id)}
-            label={document.title}
-            icon={FileIcon}
-            documentIcon={document.icon}
-            active={params.documentId === document._id}
-            level={level}
-            onExpand={() => onExpand(document._id)}
-            expanded={expanded[document._id]}
-          />
-          {expanded[document._id] && (
-            <DocumentList parentDocumentId={document._id} level={level + 1} />
-          )}
-        </div>
-      ))}
+      {documents
+        .filter((document) => (isPrivate ? !document.organizationId : true))
+        .map((document) => (
+          <div key={document._id}>
+            <Item
+              id={document._id}
+              onClick={() => onRedirect(document._id)}
+              label={document.title}
+              icon={FileIcon}
+              documentIcon={document.icon}
+              active={params.documentId === document._id}
+              level={level}
+              onExpand={() => onExpand(document._id)}
+              expanded={expanded[document._id]}
+            />
+            {expanded[document._id] && (
+              <DocumentList
+                parentDocumentId={document._id}
+                level={level + 1}
+                isPrivate={isPrivate}
+                organizationId={organizationId}
+              />
+            )}
+          </div>
+        ))}
     </>
   );
 };
