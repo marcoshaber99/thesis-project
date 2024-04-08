@@ -25,6 +25,7 @@ const client = createClient({
     const userIds = await response.json();
     return userIds;
   },
+
   async resolveRoomsInfo({ roomIds }) {
     // ...
     return [];
