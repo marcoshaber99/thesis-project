@@ -197,11 +197,6 @@ export const Navigation = () => {
             }}
           />
         </div>
-        <div className="mt-2">
-          <div className="hover:bg-sky-50">
-            <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
-          </div>
-        </div>
 
         {userMemberships?.data?.map((mem) => (
           <div key={mem.organization.id} className="ml-1">

@@ -1,14 +1,16 @@
 "use client";
-
 import { useMutation, useQuery } from "convex/react";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
-
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Toolbar } from "@/components/toolbar";
 import { Cover } from "@/components/cover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Room } from "@/components/room";
+import Loading from "./loading";
+import { ClientSideSuspense } from "@liveblocks/react";
+import { Comments } from "@/components/comments";
 
 interface DocumentIdPageProps {
   params: {
@@ -55,12 +57,37 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
     return <div>Not found</div>;
   }
 
+  const isOrganizationDocument = !!document.organizationId;
+
   return (
     <div className="pb-40">
       <Cover url={document.coverImage} />
       <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
         <Toolbar initialData={document} />
-        <Editor onChange={onChange} initialContent={document.content} />
+        <Room roomId={params.documentId} fallback={<Loading />}>
+          {isOrganizationDocument ? (
+            <div className="comments-container">
+              <div className="editor-container">
+                <Editor
+                  onChange={onChange}
+                  initialContent={document.content}
+                  editable={true}
+                />
+              </div>
+              <div className="comments-section">
+                <ClientSideSuspense fallback={<Loading />}>
+                  {() => <Comments />}
+                </ClientSideSuspense>
+              </div>
+            </div>
+          ) : (
+            <Editor
+              onChange={onChange}
+              initialContent={document.content}
+              editable={true}
+            />
+          )}
+        </Room>
       </div>
     </div>
   );

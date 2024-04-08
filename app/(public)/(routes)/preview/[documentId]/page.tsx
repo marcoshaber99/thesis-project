@@ -9,6 +9,9 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Toolbar } from "@/components/toolbar";
 import { Cover } from "@/components/cover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Room } from "@/components/room";
+import { Loading } from "@/components/Loading";
+import { RoomProvider } from "@/liveblocks.config";
 
 interface DocumentIdPageProps {
   params: {
@@ -60,11 +63,13 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
       <Cover preview url={document.coverImage} />
       <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
         <Toolbar preview initialData={document} />
-        <Editor
-          editable={false}
-          onChange={onChange}
-          initialContent={document.content}
-        />
+        <RoomProvider id={params.documentId} initialPresence={{ cursor: null }}>
+          <Editor
+            editable={false}
+            onChange={onChange}
+            initialContent={document.content}
+          />
+        </RoomProvider>
       </div>
     </div>
   );

@@ -20,7 +20,10 @@ export const archive = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -155,7 +158,10 @@ export const restore = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -244,7 +250,10 @@ export const getSearch = query({
 });
 
 export const getById = query({
-  args: { documentId: v.id("documents") },
+  args: {
+    documentId: v.id("documents"),
+    organizationId: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
@@ -262,9 +271,11 @@ export const getById = query({
       throw new Error("Not authenticated");
     }
 
+    console.log(document.organizationId);
+
     const userId = identity.subject;
 
-    if (document.userId !== userId) {
+    if (!document.organizationId && document.userId !== userId) {
       throw new Error("Unauthorized");
     }
 
@@ -280,6 +291,7 @@ export const update = mutation({
     coverImage: v.optional(v.string()),
     icon: v.optional(v.string()),
     isPublished: v.optional(v.boolean()),
+    organizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -298,7 +310,10 @@ export const update = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -327,7 +342,10 @@ export const removeIcon = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -356,13 +374,25 @@ export const removeCoverImage = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
     const document = await ctx.db.patch(args.id, {
       coverImage: undefined,
     });
+
+    return document;
+  },
+});
+
+export const get = query({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    const document = ctx.db.get(args.id);
 
     return document;
   },
