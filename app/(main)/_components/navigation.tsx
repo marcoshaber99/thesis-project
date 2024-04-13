@@ -2,7 +2,6 @@
 
 import {
   ChevronsLeft,
-  HeartHandshake,
   HomeIcon,
   Lock,
   MenuIcon,
@@ -184,10 +183,10 @@ export const Navigation = () => {
             appearance={{
               elements: {
                 rootBox: {
-                  marginLeft: "5px",
+                  marginLeft: "1px",
                 },
                 organizationSwitcherTrigger:
-                  "w-full px-3 py-2 rounded-md border border-border justify-between bg-secondary text-secondary-foreground dark:bg-muted dark:text-muted-foreground dark:border-muted",
+                  "w-full px-3 py-2 rounded-md border border-border justify-between bg-secondary text-secondary-foreground mb-3 mt-2 dark:bg-muted dark:text-muted-foreground dark:border-muted",
               },
             }}
           />
