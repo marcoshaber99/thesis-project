@@ -1,7 +1,21 @@
 "use client";
-import { BlockNoteEditor, PartialBlock } from "@blocknote/core";
+
+import {
+  BlockNoteEditor,
+  filterSuggestionItems,
+  PartialBlock,
+  Block,
+  InlineContent,
+  StyledText,
+} from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
-import { BlockNoteView, useCreateBlockNote } from "@blocknote/react";
+import {
+  BlockNoteView,
+  DefaultReactSuggestionItem,
+  getDefaultReactSlashMenuItems,
+  SuggestionMenuController,
+  useCreateBlockNote,
+} from "@blocknote/react";
 import "@blocknote/react/style.css";
 import * as Y from "yjs";
 import LiveblocksProvider from "@liveblocks/yjs";
@@ -9,6 +23,72 @@ import { useRoom, useSelf } from "@/liveblocks.config";
 import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
+
+import { HiOutlineGlobeAlt } from "react-icons/hi";
+import { Wand } from "lucide-react";
+
+interface TextItem {
+  type: "text";
+  text: string;
+  styles?: { bold?: boolean; italic?: boolean; [key: string]: any };
+}
+
+const aiAssistantItem = (editor: BlockNoteEditor) => ({
+  title: "AI Assistant",
+  onItemClick: async () => {
+    const currentPosition = editor.getTextCursorPosition();
+    if (
+      currentPosition &&
+      currentPosition.block &&
+      currentPosition.block.content
+    ) {
+      // Simplifying assumption: all items are TextItem
+      const content = (currentPosition.block.content as TextItem[])
+        .map((item) => item.text)
+        .join(" ");
+
+      try {
+        const response = await fetch("/api/completion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: content }),
+        });
+
+        if (!response.ok) {
+          console.error(
+            "Failed to fetch AI completion:",
+            await response.text()
+          );
+          return;
+        }
+
+        const completion = await response.json();
+
+        // Use the same insertion logic as the Hello World item
+        const completionBlock: PartialBlock = {
+          type: "paragraph",
+          content: [{ type: "text", text: completion, styles: {} }],
+        };
+
+        editor.insertBlocks([completionBlock], currentPosition.block, "after");
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    }
+  },
+  aliases: ["aiassist", "ai"],
+  group: "AI Tools",
+  icon: <Wand size={18} color="#8E3CCB" />,
+  subtext: "Use AI to autocomplete text based on current context.",
+});
+
+// List containing all default Slash Menu Items, as well as our custom one.
+const getCustomSlashMenuItems = (
+  editor: BlockNoteEditor
+): DefaultReactSuggestionItem[] => [
+  aiAssistantItem(editor), // Add the AI Assistant item
+  ...getDefaultReactSlashMenuItems(editor),
+];
 
 interface EditorProps {
   onChange: (value: string) => void;
@@ -110,7 +190,19 @@ function BlockNote({
 
   return (
     <div>
-      <BlockNoteView editor={editor} theme={theme} editable={editable} />
+      <BlockNoteView
+        editor={editor}
+        theme={theme}
+        editable={editable}
+        slashMenu={false}
+      >
+        <SuggestionMenuController
+          triggerCharacter={"/"}
+          getItems={async (query) =>
+            filterSuggestionItems(getCustomSlashMenuItems(editor), query)
+          }
+        />
+      </BlockNoteView>
     </div>
   );
 }

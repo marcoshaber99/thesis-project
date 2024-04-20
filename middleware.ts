@@ -8,7 +8,7 @@ export default authMiddleware({
   publicRoutes: ["/"],
   // Prevent the specified routes from accessing
   // authentication information:
-  ignoredRoutes: ["/api/edgestore/init"],
+  ignoredRoutes: ["/api/edgestore/init", "/api/completion"],
 });
 
 export const config = {
