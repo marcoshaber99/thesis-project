@@ -15,9 +15,11 @@ const client = createClient({
     const users = await response.json();
     return users;
   },
-  async resolveMentionSuggestions({ text }) {
+  async resolveMentionSuggestions({ text, roomId }) {
     const response = await fetch(
-      `/api/users/search?text=${encodeURIComponent(text)}`
+      `/api/users/search?text=${encodeURIComponent(
+        text
+      )}&roomId=${encodeURIComponent(roomId)}`
     );
     if (!response.ok) {
       throw new Error("Problem resolving mention suggestions");
@@ -25,7 +27,6 @@ const client = createClient({
     const userIds = await response.json();
     return userIds;
   },
-
   async resolveRoomsInfo({ roomIds }) {
     // ...
     return [];
