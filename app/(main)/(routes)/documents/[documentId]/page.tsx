@@ -1,7 +1,7 @@
 "use client";
 import { useMutation, useQuery } from "convex/react";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Toolbar } from "@/components/toolbar";
@@ -11,6 +11,9 @@ import { Room } from "@/components/room";
 import Loading from "./loading";
 import { ClientSideSuspense } from "@liveblocks/react";
 import { Comments } from "@/components/comments";
+import { Button } from "@/components/ui/button";
+import classNames from "classnames";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DocumentIdPageProps {
   params: {
@@ -19,6 +22,12 @@ interface DocumentIdPageProps {
 }
 
 const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
+  const [showComments, setShowComments] = useState(true);
+
+  const toggleComments = () => {
+    setShowComments(!showComments);
+  };
+
   const Editor = useMemo(
     () => dynamic(() => import("@/components/editor"), { ssr: false }),
     []
@@ -66,18 +75,45 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
         <Toolbar initialData={document} />
         <Room roomId={params.documentId} fallback={<Loading />}>
           {isOrganizationDocument ? (
-            <div className="comments-container">
-              <div className="editor-container">
+            <div className="mt-8">
+              <div className="mb-48">
                 <Editor
                   onChange={onChange}
                   initialContent={document.content}
                   editable={true}
                 />
               </div>
-              <div className="comments-section">
-                <ClientSideSuspense fallback={<Loading />}>
-                  {() => <Comments />}
-                </ClientSideSuspense>
+              <div className="ml-14">
+                <Button
+                  variant="secondary"
+                  onClick={toggleComments}
+                  className="rounded-md bg-indigo-500 hover:bg-indigo-800 text-white"
+                >
+                  {showComments ? (
+                    <>
+                      Comments
+                      <ChevronDown className="ml-2 h-5 w-5" />
+                    </>
+                  ) : (
+                    <>
+                      Comments
+                      <ChevronUp className="ml-2 h-5 w-5" />
+                    </>
+                  )}
+                </Button>
+                <div
+                  className={classNames(
+                    "mt-4 transition-all duration-500 ease-in-out overflow-hidden",
+                    {
+                      "max-h-0 opacity-0": !showComments,
+                      "max-h-screen opacity-100": showComments,
+                    }
+                  )}
+                >
+                  <ClientSideSuspense fallback={<Loading />}>
+                    {() => <Comments />}
+                  </ClientSideSuspense>
+                </div>
               </div>
             </div>
           ) : (
