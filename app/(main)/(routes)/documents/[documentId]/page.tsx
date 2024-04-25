@@ -80,7 +80,7 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
         <Room roomId={params.documentId} fallback={<Loading />}>
           {isOrganizationDocument ? (
             <div>
-              <div className="mb-32">
+              <div className="mb-16">
                 <Editor
                   onChange={onChange}
                   initialContent={document.content}
