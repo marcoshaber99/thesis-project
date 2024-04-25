@@ -1,35 +1,44 @@
 "use client";
 
 import { ElementRef, useRef, useState } from "react";
-import { ImageIcon, Smile, X } from "lucide-react";
+import {
+  ImageIcon,
+  Smile,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  MessageCircleIcon,
+} from "lucide-react";
 import { useMutation } from "convex/react";
 import TextareaAutosize from "react-textarea-autosize";
-
 import { useCoverImage } from "@/hooks/use-cover-image";
 import { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
-
 import { IconPicker } from "./icon-picker";
 
 interface ToolbarProps {
   initialData: Doc<"documents">;
   preview?: boolean;
+  showComments: boolean;
+  toggleComments?: () => void;
 }
 
-export const Toolbar = ({ initialData, preview }: ToolbarProps) => {
+export const Toolbar = ({
+  initialData,
+  preview,
+  showComments,
+  toggleComments,
+}: ToolbarProps) => {
   const inputRef = useRef<ElementRef<"textarea">>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialData.title);
-
   const update = useMutation(api.documents.update);
   const removeIcon = useMutation(api.documents.removeIcon);
-
   const coverImage = useCoverImage();
 
   const enableInput = () => {
     if (preview) return;
-
     setIsEditing(true);
     setTimeout(() => {
       setValue(initialData.title);
@@ -111,6 +120,26 @@ export const Toolbar = ({ initialData, preview }: ToolbarProps) => {
           >
             <ImageIcon className="h-4 w-4 mr-2" />
             Add cover
+          </Button>
+        )}
+        {toggleComments && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleComments}
+            className="text-muted-foreground text-xs"
+          >
+            {showComments ? (
+              <>
+                <MessageCircleIcon className="h-4 w-4 mr-2" />
+                Hide Comments
+              </>
+            ) : (
+              <>
+                <MessageCircleIcon className="h-4 w-4 mr-2" />
+                Show Comments
+              </>
+            )}
           </Button>
         )}
       </div>

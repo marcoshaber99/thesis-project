@@ -72,11 +72,15 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
     <div className="pb-40">
       <Cover url={document.coverImage} />
       <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
-        <Toolbar initialData={document} />
+        <Toolbar
+          initialData={document}
+          showComments={isOrganizationDocument && showComments}
+          toggleComments={isOrganizationDocument ? toggleComments : undefined}
+        />{" "}
         <Room roomId={params.documentId} fallback={<Loading />}>
           {isOrganizationDocument ? (
-            <div className="mt-8">
-              <div className="mb-48">
+            <div>
+              <div className="mb-32">
                 <Editor
                   onChange={onChange}
                   initialContent={document.content}
@@ -84,26 +88,9 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
                 />
               </div>
               <div className="ml-14">
-                <Button
-                  variant="secondary"
-                  onClick={toggleComments}
-                  className="rounded-md bg-indigo-500 hover:bg-indigo-800 text-white"
-                >
-                  {showComments ? (
-                    <>
-                      Comments
-                      <ChevronDown className="ml-2 h-5 w-5" />
-                    </>
-                  ) : (
-                    <>
-                      Comments
-                      <ChevronUp className="ml-2 h-5 w-5" />
-                    </>
-                  )}
-                </Button>
                 <div
                   className={classNames(
-                    "mt-4 transition-all duration-500 ease-in-out overflow-hidden",
+                    "transition-all duration-500 ease-in-out overflow-hidden",
                     {
                       "max-h-0 opacity-0": !showComments,
                       "max-h-screen opacity-100": showComments,
