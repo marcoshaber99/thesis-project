@@ -1,4 +1,5 @@
 "use client";
+
 import { useMutation, useQuery } from "convex/react";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
@@ -11,9 +12,7 @@ import { Room } from "@/components/room";
 import Loading from "./loading";
 import { ClientSideSuspense } from "@liveblocks/react";
 import { Comments } from "@/components/comments";
-import { Button } from "@/components/ui/button";
 import classNames from "classnames";
-import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DocumentIdPageProps {
   params: {

@@ -8,7 +8,7 @@ export function Comments() {
   return (
     <div>
       {threads.map((thread) => (
-        <Thread className="thread" key={thread.id} thread={thread} />
+        <Thread className="thread mt-1" key={thread.id} thread={thread} />
       ))}
       <Composer className="composer mt-2" />
     </div>
