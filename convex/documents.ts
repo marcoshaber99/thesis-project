@@ -123,18 +123,14 @@ export const create = mutation({
 export const getTrash = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
 
-    const userId = identity.subject;
-
+    // Fetch all archived documents
     const documents = await ctx.db
       .query("documents")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("isArchived"), true))
-      .order("desc")
       .collect();
 
     return documents;
@@ -205,25 +201,14 @@ export const remove = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
-    const userId = identity.subject;
-
     const existingDocument = await ctx.db.get(args.id);
-
     if (!existingDocument) {
       throw new Error("Not found");
     }
-
-    if (existingDocument.userId !== userId) {
-      throw new Error("Unauthorized");
-    }
-
     const document = await ctx.db.delete(args.id);
-
     return document;
   },
 });
@@ -238,11 +223,10 @@ export const getSearch = query({
 
     const userId = identity.subject;
 
+    // Fetch all documents that are not archived
     const documents = await ctx.db
       .query("documents")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("isArchived"), false))
-      .order("desc")
       .collect();
 
     return documents;

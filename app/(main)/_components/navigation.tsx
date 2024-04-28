@@ -2,6 +2,7 @@
 
 import {
   ChevronsLeft,
+  HeartHandshakeIcon,
   HomeIcon,
   Lock,
   MenuIcon,
@@ -35,6 +36,7 @@ import { Item } from "./item";
 import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
+import { NewButton } from "./new-button";
 
 export const Navigation = () => {
   const { userMemberships } = useOrganizationList({
@@ -168,6 +170,7 @@ export const Navigation = () => {
           <UserItem />
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
           <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
+          <NewButton />
           <Item
             onClick={() => handleCreate()}
             label="New page"
