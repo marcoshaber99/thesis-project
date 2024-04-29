@@ -4,35 +4,47 @@ import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { SignInButton } from "@clerk/clerk-react";
 import { useConvexAuth } from "convex/react";
+import { ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 const Heading = () => {
   const { isAuthenticated, isLoading } = useConvexAuth();
   return (
-    <div className="max-w-3xl space-y-4">
-      <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
-        Welcome To{" "}
-        <span className="inline-block text-3xl sm:text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-600 dark:from-cyan-400 dark:to-green-300">
-          Harmony
-        </span>
-      </h1>
+    <section className="w-full">
+      <div className="container md:px-6">
+        <div className="flex flex-col items-center space-y-4 text-center">
+          <div className="space-y-2 mb-3">
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+              Harmony is a better way to write notes.
+            </h1>
+            <div className="flex items-center justify-center p-5">
+              <Image src="./logo.svg" width="200" height="100" alt="Logo" />
+            </div>
+            <p className="mx-auto max-w-[700px] text-gray-700 md:text-xl dark:text-gray-300">
+              Create, communicate, and collaborate seamlessly — all in one place
+            </p>
+          </div>
+          <div className="space-x-4">
+            {isAuthenticated && !isLoading && (
+              <Link href="/documents" className="gap-2">
+                <Button className="px-6 py-2 rounded-full focus:outline-none focus:ring transition duration-150 ease-in-out flex items-center">
+                  <span className="mr-2 font-medium">Enter Harmony</span>
+                  <ChevronRightIcon className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
 
-      <div className="flex items-center justify-center p-5">
-        <Image src="./logo.svg" width="200" height="100" alt="Logo" />
-      </div>
-
-      <div className="text-center">
-        <p className="mt-6 mb-8 text-lg leading-8 text-gray-700 dark:text-gray-200">
-          Elevate Your Workflow with{" "}
-          <span className="text-blue-500 leading-snug font-semibold dark:text-blue-300">
-            AI-Powered
-          </span>{" "}
-          Assistance and{" "}
-          <span className="text-blue-500 leading-snug font-semibold dark:text-blue-300">
-            Collaboration
-          </span>{" "}
-        </p>
+            {!isAuthenticated && !isLoading && (
+              <SignInButton mode="modal">
+                <Button className="px-6 py-2 rounded-full focus:outline-none focus:ring transition duration-150 ease-in-out flex items-center">
+                  <span className="mr-2 font-medium">Get Started</span>
+                  <ChevronRightIcon className="h-5 w-5" />
+                </Button>
+              </SignInButton>
+            )}
+          </div>
+        </div>
       </div>
 
       {isLoading && (
@@ -40,23 +52,7 @@ const Heading = () => {
           <Spinner size="lg" />
         </div>
       )}
-
-      {isAuthenticated && !isLoading && (
-        <Link href="/documents" className="gap-2">
-          <button className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
-            Enter Harmony
-          </button>
-        </Link>
-      )}
-
-      {!isAuthenticated && !isLoading && (
-        <SignInButton mode="modal">
-          <button className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
-            Get Started
-          </button>
-        </SignInButton>
-      )}
-    </div>
+    </section>
   );
 };
 

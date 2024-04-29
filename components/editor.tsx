@@ -22,8 +22,6 @@ import { useRoom, useSelf } from "@/liveblocks.config";
 import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
-
-import { Wand } from "lucide-react";
 import Image from "next/image";
 
 interface TextItem {
