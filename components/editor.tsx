@@ -4,11 +4,10 @@ import {
   BlockNoteEditor,
   filterSuggestionItems,
   PartialBlock,
-  Block,
-  InlineContent,
-  StyledText,
 } from "@blocknote/core";
+import { toast } from "sonner";
 import "@blocknote/core/fonts/inter.css";
+
 import {
   BlockNoteView,
   DefaultReactSuggestionItem,
@@ -24,8 +23,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
 
-import { HiOutlineGlobeAlt } from "react-icons/hi";
 import { Wand } from "lucide-react";
+import Image from "next/image";
 
 interface TextItem {
   type: "text";
@@ -42,11 +41,9 @@ const aiAssistantItem = (editor: BlockNoteEditor) => ({
       currentPosition.block &&
       currentPosition.block.content
     ) {
-      // Simplifying assumption: all items are TextItem
       const content = (currentPosition.block.content as TextItem[])
         .map((item) => item.text)
         .join(" ");
-
       try {
         const response = await fetch("/api/completion", {
           method: "POST",
@@ -54,31 +51,47 @@ const aiAssistantItem = (editor: BlockNoteEditor) => ({
           body: JSON.stringify({ prompt: content }),
         });
 
+        if (response.status === 429) {
+          const { retryAfter } = await response.json();
+          toast.error(
+            `Rate limit exceeded. Please try again in ${retryAfter}.`,
+            { position: "top-center" }
+          );
+          return;
+        }
+
         if (!response.ok) {
-          console.error(
-            "Failed to fetch AI completion:",
-            await response.text()
+          const errorText = await response.text();
+          console.error("Failed to fetch AI completion:", errorText);
+          toast.error(
+            "An error occurred during your request. Please try again."
           );
           return;
         }
 
         const completion = await response.json();
-
-        // Use the same insertion logic as the Hello World item
         const completionBlock: PartialBlock = {
           type: "paragraph",
           content: [{ type: "text", text: completion, styles: {} }],
         };
-
         editor.insertBlocks([completionBlock], currentPosition.block, "after");
       } catch (error) {
         console.error("Fetch error:", error);
+        toast.error("An error occurred during your request. Please try again.");
       }
     }
   },
   aliases: ["aiassist", "ai"],
   group: "AI Tools",
-  icon: <Wand size={18} color="#8E3CCB" />,
+  icon: (
+    <Image
+      src="/magic2.svg"
+      width={24}
+      height={24}
+      alt="image of a wand"
+      className="animate-pulse rotate-270"
+    />
+  ),
   subtext: "Use AI to autocomplete text based on current context.",
 });
 
@@ -86,7 +99,7 @@ const aiAssistantItem = (editor: BlockNoteEditor) => ({
 const getCustomSlashMenuItems = (
   editor: BlockNoteEditor
 ): DefaultReactSuggestionItem[] => [
-  aiAssistantItem(editor), // Add the AI Assistant item
+  aiAssistantItem(editor),
   ...getDefaultReactSlashMenuItems(editor),
 ];
 
