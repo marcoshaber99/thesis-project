@@ -79,14 +79,14 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
         <Room roomId={params.documentId} fallback={<Loading />}>
           {isOrganizationDocument ? (
             <div>
-              <div className="mb-16">
+              <div className="mb-16 ">
                 <Editor
                   onChange={onChange}
                   initialContent={document.content}
                   editable={true}
                 />
               </div>
-              <div className="ml-14">
+              <div className="ml-4">
                 <div
                   className={classNames(
                     "transition-all duration-500 ease-in-out overflow-hidden",
