@@ -1,20 +1,20 @@
 "use client";
 
-import { HeartHandshakeIcon } from "lucide-react";
+import { HeartHandshakeIcon, UserPlus2Icon } from "lucide-react";
 import { CreateOrganization } from "@clerk/nextjs";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { FaUserPlus } from "react-icons/fa";
+
 import { Item } from "./item";
 
 export const NewButton = () => {
   return (
     <Dialog>
       <DialogTrigger asChild className="btn btn-primary">
-        <button>
-          <Item label="Create a Teamspace" icon={HeartHandshakeIcon} />
-        </button>
+        <Item label="Create a Teamspace" icon={UserPlus2Icon} />
       </DialogTrigger>
-      <DialogContent className="p-0 bg-transparent border-none max-w-[480px]">
+      <DialogContent className="p-0 border-none max-w-[480px] text-black">
         <CreateOrganization afterCreateOrganizationUrl="/documents" />
       </DialogContent>
     </Dialog>
