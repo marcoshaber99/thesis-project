@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Poppins } from "next/font/google";
 
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -26,8 +27,9 @@ const Logo = () => {
         alt="Logo"
         className="hidden dark:block"
       />
-
-      <p className={cn("font-semibold", font.className)}>Harmony</p>
+      <Link className="text-2xl font-bold tracking-tight" href="#">
+        Harmony
+      </Link>{" "}
     </div>
   );
 };

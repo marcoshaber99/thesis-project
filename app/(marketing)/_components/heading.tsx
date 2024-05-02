@@ -25,7 +25,7 @@ const Heading = () => {
               Create, communicate, and collaborate seamlessly — all in one place
             </p>
           </div>
-          <div className="space-x-4">
+          <div className="flex justify-center space-x-4">
             {isAuthenticated && !isLoading && (
               <Link href="/documents" className="gap-2">
                 <Button className="px-6 py-2 rounded-full focus:outline-none focus:ring transition duration-150 ease-in-out flex items-center">
@@ -34,7 +34,6 @@ const Heading = () => {
                 </Button>
               </Link>
             )}
-
             {!isAuthenticated && !isLoading && (
               <SignInButton mode="modal">
                 <Button className="px-6 py-2 rounded-full focus:outline-none focus:ring transition duration-150 ease-in-out flex items-center">
@@ -46,7 +45,6 @@ const Heading = () => {
           </div>
         </div>
       </div>
-
       {isLoading && (
         <div className="w-full flex items-center justify-center">
           <Spinner size="lg" />
