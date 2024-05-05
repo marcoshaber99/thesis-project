@@ -11,7 +11,7 @@ const MarketingPage = () => {
         <Breadcrumb />
         <Heading />
       </div>
-      <Footer className="z-20" />
+      <Footer className="z-20 dark:text-gray-400" />
     </div>
   );
 };
