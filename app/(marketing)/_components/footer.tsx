@@ -12,7 +12,7 @@ export default function Footer({ className }: FooterProps) {
         <nav className="flex flex-wrap justify-center space-x-6 lg:space-x-10">
           <Link
             className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
-            href="#"
+            href="/docs"
           >
             Docs
           </Link>
