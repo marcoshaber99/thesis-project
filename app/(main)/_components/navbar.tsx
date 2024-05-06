@@ -24,7 +24,7 @@ interface NavbarProps {
 export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
   const params = useParams();
   const document = useQuery(api.documents.getById, {
-    documentId: params.documentId as Id<"documents">,
+    documentId: params?.documentId as Id<"documents">,
   });
 
   if (document === undefined) {
@@ -48,7 +48,7 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
     <>
       {isOrganizationDocument ? (
         <Room
-          roomId={params.documentId as Id<"documents">}
+          roomId={params?.documentId as Id<"documents">}
           fallback={<Loading />}
         >
           <nav className="bg-background dark:bg-[#1F1F1F] px-3 py-2 w-full flex items-center gap-x-4">
