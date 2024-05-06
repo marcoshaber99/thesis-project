@@ -22,13 +22,83 @@ import { useRoom, useSelf } from "@/liveblocks.config";
 import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
-import Image from "next/image";
+import { LanguagesIcon, WandIcon } from "lucide-react";
 
 interface TextItem {
   type: "text";
   text: string;
   styles?: { bold?: boolean; italic?: boolean; [key: string]: any };
 }
+
+const aiTranslateItem = (editor: BlockNoteEditor) => ({
+  title: "AI Translate",
+  onItemClick: async () => {
+    const currentPosition = editor.getTextCursorPosition();
+    if (
+      currentPosition &&
+      currentPosition.block &&
+      currentPosition.block.content
+    ) {
+      const content = (currentPosition.block.content as TextItem[])
+        .map((item) => item.text)
+        .join(" ");
+
+      const targetLanguage = prompt(
+        "Enter the target language (e.g., 'French', 'Spanish', 'German'):"
+      );
+
+      if (!targetLanguage) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: content, targetLanguage }),
+        });
+
+        if (response.status === 429) {
+          const { retryAfter } = await response.json();
+          toast.error(
+            `Rate limit exceeded. Please try again in ${retryAfter}.`,
+            { position: "top-center" }
+          );
+          return;
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Failed to fetch AI translation:", errorText);
+          toast.error(
+            "An error occurred during your request. Please try again."
+          );
+          return;
+        }
+
+        const translation = await response.json();
+        const translationBlock: PartialBlock = {
+          type: "paragraph",
+          content: [{ type: "text", text: translation, styles: {} }],
+        };
+        editor.insertBlocks([translationBlock], currentPosition.block, "after");
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("An error occurred during your request. Please try again.");
+      }
+    }
+  },
+  aliases: ["translate", "ai-translate"],
+  group: "AI Tools",
+  icon: (
+    <LanguagesIcon
+      width={24}
+      height={24}
+      className="dark:text-cyan-400 text-purple-700 "
+    />
+  ),
+  subtext: "Translate selected text using AI.",
+});
 
 const aiAssistantItem = (editor: BlockNoteEditor) => ({
   title: "AI Assistant",
@@ -82,23 +152,21 @@ const aiAssistantItem = (editor: BlockNoteEditor) => ({
   aliases: ["aiassist", "ai"],
   group: "AI Tools",
   icon: (
-    <Image
-      src="/magic2.svg"
+    <WandIcon
       width={24}
       height={24}
-      alt="image of a wand"
-      className="animate-pulse rotate-270"
+      className="dark:text-cyan-400 text-purple-700 "
     />
   ),
   subtext: "Use AI to autocomplete text based on current context.",
 });
 
-// List containing all default Slash Menu Items, as well as our custom one.
 const getCustomSlashMenuItems = (
   editor: BlockNoteEditor
 ): DefaultReactSuggestionItem[] => [
-  aiAssistantItem(editor),
   ...getDefaultReactSlashMenuItems(editor),
+  aiAssistantItem(editor),
+  aiTranslateItem(editor),
 ];
 
 interface EditorProps {
