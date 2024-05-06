@@ -4,6 +4,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
 const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
@@ -22,7 +23,9 @@ export async function POST(request: Request) {
 
   if (
     document?.organizationId &&
-    document?.organizationId !== authorization.orgId
+    authorization &&
+    document?.organizationId !== authorization.orgId &&
+    !document?.isPublished
   ) {
     return new Response("Unauthorized", { status: 403 });
   }
@@ -31,6 +34,7 @@ export async function POST(request: Request) {
     name: user.firstName || "Anonymous",
     picture: user.imageUrl,
     color: generateColorFromUserId(user.id),
+    organizationId: authorization?.orgId,
   };
 
   const session = liveblocks.prepareSession(user.id, { userInfo });
@@ -40,6 +44,7 @@ export async function POST(request: Request) {
   }
 
   const { status, body } = await session.authorize();
+
   return new Response(body, { status });
 }
 

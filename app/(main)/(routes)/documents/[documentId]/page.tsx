@@ -77,37 +77,27 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
           toggleComments={isOrganizationDocument ? toggleComments : undefined}
         />{" "}
         <Room roomId={params.documentId} fallback={<Loading />}>
-          {isOrganizationDocument ? (
-            <div>
-              <div className="mb-16 ">
-                <Editor
-                  onChange={onChange}
-                  initialContent={document.content}
-                  editable={true}
-                />
-              </div>
-              <div className="ml-4">
-                <div
-                  className={classNames(
-                    "transition-all duration-500 ease-in-out overflow-hidden",
-                    {
-                      "max-h-0 opacity-0": !showComments,
-                      "max-h-screen opacity-100": showComments,
-                    }
-                  )}
-                >
-                  <ClientSideSuspense fallback={<Loading />}>
-                    {() => <Comments />}
-                  </ClientSideSuspense>
-                </div>
+          <Editor
+            onChange={onChange}
+            initialContent={document.content}
+            editable={true}
+          />
+          {isOrganizationDocument && (
+            <div className="ml-4">
+              <div
+                className={classNames(
+                  "transition-all duration-500 ease-in-out overflow-hidden",
+                  {
+                    "max-h-0 opacity-0": !showComments,
+                    "max-h-screen opacity-100": showComments,
+                  }
+                )}
+              >
+                <ClientSideSuspense fallback={<Loading />}>
+                  {() => <Comments />}
+                </ClientSideSuspense>
               </div>
             </div>
-          ) : (
-            <Editor
-              onChange={onChange}
-              initialContent={document.content}
-              editable={true}
-            />
           )}
         </Room>
       </div>

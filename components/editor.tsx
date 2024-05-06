@@ -107,7 +107,11 @@ interface EditorProps {
   editable?: boolean;
 }
 
-export function Editor({ onChange, initialContent, editable }: EditorProps) {
+export function Editor({
+  onChange,
+  initialContent,
+  editable = true,
+}: EditorProps) {
   const room = useRoom();
   const [doc, setDoc] = useState<Y.Doc>();
   const [provider, setProvider] = useState<any>();
@@ -193,12 +197,13 @@ function BlockNote({
   }, [editor, onChange]);
 
   useEffect(() => {
-    const unsubscribe = editor.onChange(handleEditorChange);
-    return () => {
-      unsubscribe();
-    };
-  }, [editor, handleEditorChange]);
-
+    if (editable) {
+      const unsubscribe = editor.onChange(handleEditorChange);
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [editor, handleEditorChange, editable]);
   return (
     <div>
       <BlockNoteView

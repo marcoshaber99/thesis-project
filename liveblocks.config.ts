@@ -45,6 +45,7 @@ type UserMeta = {
     name?: string;
     picture?: string;
     color?: string;
+    organizationId?: string;
   };
 };
 

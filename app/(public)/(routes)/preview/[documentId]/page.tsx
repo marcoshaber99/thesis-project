@@ -9,8 +9,6 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Toolbar } from "@/components/toolbar";
 import { Cover } from "@/components/cover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Room } from "@/components/room";
-import { Loading } from "@/components/Loading";
 import { RoomProvider } from "@/liveblocks.config";
 
 interface DocumentIdPageProps {
