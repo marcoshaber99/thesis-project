@@ -195,10 +195,9 @@ export const Navigation = () => {
           />
         </div>
 
+        <Item label="Teamspaces" icon={HomeIcon} />
         {userMemberships?.data?.map((mem) => (
           <>
-            <Item label="Teamspaces" icon={HomeIcon} />
-
             <div key={mem.organization.id} className="ml-1">
               <Item label={mem.organization.name} icon={Users} />
               <DocumentList organizationId={mem.organization.id} />

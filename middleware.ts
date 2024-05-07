@@ -5,7 +5,7 @@ import { authMiddleware } from "@clerk/nextjs";
 
 export default authMiddleware({
   // Allow signed out users to access the specified routes:
-  publicRoutes: ["/"],
+  publicRoutes: ["/", "/docs(.*)"],
   // Prevent the specified routes from accessing
   // authentication information:
   ignoredRoutes: ["/api/edgestore/init", "/api/completion"],
