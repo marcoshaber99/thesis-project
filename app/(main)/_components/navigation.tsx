@@ -165,7 +165,7 @@ export const Navigation = () => {
 
   const { user } = useUser();
   const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
-    userId: user?.id,
+    userId: user?.id || "",
   });
 
   const pay = useAction(api.stripe.pay);
