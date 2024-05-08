@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/popover";
 import { useSearch } from "@/hooks/use-search";
 import { useSettings } from "@/hooks/use-settings";
+
 import { useOrganizationList } from "@clerk/nextjs";
 
 import { OrganizationSwitcher } from "@clerk/nextjs";
@@ -38,6 +39,9 @@ import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
 import { NewButton } from "./new-button";
 
+import { useProModal } from "@/hooks/use-pro-modal";
+import { useApiMutation } from "@/hooks/use-api-mutation";
+
 export const Navigation = () => {
   const { userMemberships } = useOrganizationList({
     userMemberships: {
@@ -46,6 +50,10 @@ export const Navigation = () => {
   });
   const router = useRouter();
   const settings = useSettings();
+
+  const { onOpen } = useProModal();
+  const { mutate, pending } = useApiMutation(api.documents.create);
+
   const search = useSearch();
   const params = useParams();
   const pathname = usePathname();
@@ -134,18 +142,21 @@ export const Navigation = () => {
   };
 
   const handleCreate = (organizationId?: string) => {
-    const promise = create({
+    mutate({
       title: "Untitled",
       organizationId: organizationId || undefined,
-    }).then((documentId) => router.push(`/documents/${documentId}`));
-
-    toast.promise(promise, {
-      loading: "Creating a new note...",
-      success: "New note created!",
-      error: "Failed to create a new note.",
-    });
+    })
+      .then((documentId) => {
+        if (documentId) {
+          toast.success("New note created");
+          router.push(`/documents/${documentId}`);
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to create a new note");
+        onOpen();
+      });
   };
-
   return (
     <>
       <aside
@@ -195,7 +206,7 @@ export const Navigation = () => {
           />
         </div>
 
-        <Item label="Teamspaces" icon={HomeIcon} />
+        <Item label="Organizations" icon={HomeIcon} />
         {userMemberships?.data?.map((mem) => (
           <>
             <div key={mem.organization.id} className="ml-1">

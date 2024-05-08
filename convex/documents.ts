@@ -3,6 +3,8 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 
+const ORGANIZATION_DOCUMENT_LIMIT = 2;
+
 export const archive = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
@@ -92,21 +94,30 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
     const userId = identity.subject;
     let organizationId = args.organizationId;
-
     if (args.parentDocument) {
       const parentDocument = await ctx.db.get(args.parentDocument);
       if (parentDocument) {
         organizationId = parentDocument.organizationId || organizationId;
       }
     }
-
+    if (organizationId) {
+      const documents = await ctx.db
+        .query("documents")
+        .withIndex("by_organization", (q) =>
+          q.eq("organizationId", organizationId)
+        )
+        .filter((q) => q.eq(q.field("isArchived"), false))
+        .collect();
+      const documentCount = documents.length;
+      if (documentCount >= ORGANIZATION_DOCUMENT_LIMIT) {
+        throw new Error("ORGANIZATION_DOCUMENT_LIMIT_REACHED");
+      }
+    }
     const document = await ctx.db.insert("documents", {
       title: args.title,
       parentDocument: args.parentDocument,
@@ -115,7 +126,6 @@ export const create = mutation({
       isPublished: false,
       organizationId,
     });
-
     return document;
   },
 });
