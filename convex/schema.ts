@@ -17,4 +17,14 @@ export default defineSchema({
     .index("by_user_parent", ["userId", "parentDocument"])
     .index("by_organization", ["organizationId"])
     .index("by_organization_parent", ["organizationId", "parentDocument"]),
+
+  userSubscription: defineTable({
+    userId: v.string(),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.string(),
+    stripePriceId: v.string(),
+    stripeCurrentPeriodEnd: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_subscription", ["stripeSubscriptionId"]),
 });

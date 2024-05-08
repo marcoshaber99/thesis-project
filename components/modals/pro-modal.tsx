@@ -1,58 +1,69 @@
 "use client";
 
 import { useState } from "react";
-import { useOrganization } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useProModal } from "@/hooks/use-pro-modal";
-import Image from "next/image";
-import { Poppins } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const font = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
+import { CheckCircle } from "lucide-react";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export const ProModal = () => {
   const { isOpen, onClose } = useProModal();
   const [pending, setPending] = useState(false);
-  const { organization } = useOrganization();
+  const { user } = useUser();
+  const pay = useAction(api.stripe.pay);
 
   const handleUpgrade = async () => {
-    if (!organization?.id) return;
+    if (!user?.id) return;
     setPending(true);
     try {
-      // TODO: Implement the upgrade logic using Stripe
-      console.log("Upgrading to pro plan...");
+      const redirectUrl = await pay({
+        userId: user.id,
+      });
+      window.location.href = redirectUrl;
     } finally {
       setPending(false);
-      onClose();
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[340px] p-0 overflow-hidden dark:bg-white dark:text-black">
-        <div className="aspect-video relative flex items-center justify-center">
-          <Image src="/pro.svg" alt="pro" className="object-fit" fill />
-        </div>
-        <div
-          className={cn(
-            "text-neutral-700 mx-auto space-y-6 p-6",
-            font.className
-          )}
-        >
-          <h2 className="font-medium text-lg">🚀 Upgrade to Pro!</h2>
-          <div className="pl-3">
-            <ul className="text-[11px] space-y-1 list-disc">
-              <li>Unlimited Organizations</li>
-              <li>Unlimited Organization Members</li>
-              <li>Unlimited AI Assistance</li>
+    <Dialog open={isOpen} onOpenChange={onClose} className="dialog-overlay">
+      <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden dark:bg-white dark:text-black ">
+        <div className="relative bg-white text-slate-900 p-6 sm:p-8  ">
+          <div className="absolute inset-0 bg-white dark:opacity-30"></div>
+          <div className="relative z-10">
+            <h2 className="text-2xl sm:text-3xl font-semibold mb-4">
+              🚀 Upgrade to Pro!
+            </h2>
+            <p className="text-sm sm:text-base mb-6">
+              Unlock the full potential of Harmony with these amazing features:
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-center space-x-3">
+                <CheckCircle className="h-6 w-6 text-emerald-500" />
+                <span>Unlimited Organizations</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <CheckCircle className="h-6 w-6 text-emerald-500" />
+                <span>Unlimited Organization Members</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <CheckCircle className="h-6 w-6 text-emerald-500" />
+                <span>Unlimited AI Assistance</span>
+              </li>
             </ul>
           </div>
-          <Button size="sm" className="w-full">
-            Upgrade
+        </div>
+        <div className="p-6 sm:p-8">
+          <Button
+            size="lg"
+            className="w-full bg-blue-600 hover:bg-black dark:text-white "
+            onClick={handleUpgrade}
+            disabled={pending}
+          >
+            {pending ? "Upgrading..." : "Upgrade Now"}
           </Button>
         </div>
       </DialogContent>

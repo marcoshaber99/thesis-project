@@ -16,8 +16,10 @@ import {
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
+import { useQuery } from "convex/react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 import { api } from "@/convex/_generated/api";
@@ -38,9 +40,12 @@ import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
 import { NewButton } from "./new-button";
-
+import { useUser } from "@clerk/clerk-react";
+import { useAction } from "convex/react";
+import { Badge } from "@/components/ui/badge";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { Banknote } from "lucide-react";
 
 export const Navigation = () => {
   const { userMemberships } = useOrganizationList({
@@ -157,6 +162,32 @@ export const Navigation = () => {
         onOpen();
       });
   };
+
+  const { user } = useUser();
+  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
+    userId: user?.id,
+  });
+
+  const pay = useAction(api.stripe.pay);
+  const portal = useAction(api.stripe.portal);
+  const [portalPending, setPortalPending] = useState(false);
+
+  const handleUpgrade = async () => {
+    if (!user?.id) return;
+    setPortalPending(true);
+    try {
+      const action = isSubscribed ? portal : pay;
+      const redirectUrl = await action({
+        userId: user.id,
+      });
+      window.location.href = redirectUrl;
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setPortalPending(false);
+    }
+  };
+
   return (
     <>
       <aside
@@ -238,6 +269,18 @@ export const Navigation = () => {
               <TrashBox />
             </PopoverContent>
           </Popover>
+
+          <Button
+            onClick={handleUpgrade}
+            disabled={portalPending}
+            variant="link"
+            size="sm"
+            className="ml-auto"
+          >
+            {" "}
+            <Banknote className="h-4 w-4 mr-2" />
+            {isSubscribed ? "Manage Subscription" : "Upgrade to Pro"}
+          </Button>
         </div>
         <div
           onMouseDown={handleMouseDown}

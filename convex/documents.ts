@@ -86,6 +86,7 @@ export const getSidebar = query({
     return documents;
   },
 });
+
 export const create = mutation({
   args: {
     title: v.string(),
@@ -97,15 +98,26 @@ export const create = mutation({
     if (!identity) {
       throw new Error("Not authenticated");
     }
+
     const userId = identity.subject;
     let organizationId = args.organizationId;
+
     if (args.parentDocument) {
       const parentDocument = await ctx.db.get(args.parentDocument);
       if (parentDocument) {
         organizationId = parentDocument.organizationId || organizationId;
       }
     }
-    if (organizationId) {
+
+    const userSubscription = await ctx.db
+      .query("userSubscription")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    const periodEnd = userSubscription?.stripeCurrentPeriodEnd;
+    const isSubscribed = periodEnd && periodEnd > Date.now();
+
+    if (organizationId && !isSubscribed) {
       const documents = await ctx.db
         .query("documents")
         .withIndex("by_organization", (q) =>
@@ -113,11 +125,13 @@ export const create = mutation({
         )
         .filter((q) => q.eq(q.field("isArchived"), false))
         .collect();
+
       const documentCount = documents.length;
       if (documentCount >= ORGANIZATION_DOCUMENT_LIMIT) {
         throw new Error("ORGANIZATION_DOCUMENT_LIMIT_REACHED");
       }
     }
+
     const document = await ctx.db.insert("documents", {
       title: args.title,
       parentDocument: args.parentDocument,
@@ -126,10 +140,10 @@ export const create = mutation({
       isPublished: false,
       organizationId,
     });
+
     return document;
   },
 });
-
 export const getTrash = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();

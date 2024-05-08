@@ -12,9 +12,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Badge } from "@/components/ui/badge";
 
 export const UserItem = () => {
   const { user } = useUser();
+  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
+    userId: user?.id,
+  });
 
   return (
     <DropdownMenu>
@@ -57,6 +63,11 @@ export const UserItem = () => {
               </p>
             </div>
           </div>
+          {isSubscribed && (
+            <Badge variant="secondary" className="mt-1 w-32 p-4">
+              ⚡️ Pro Member
+            </Badge>
+          )}
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem
