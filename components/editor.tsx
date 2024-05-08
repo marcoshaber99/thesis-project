@@ -202,9 +202,10 @@ export function Editor({
   const { edgestore } = useEdgeStore();
 
   const { user } = useUser();
-  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
-    userId: user?.id,
-  });
+  const isSubscribed = useQuery(
+    api.subscriptions.getIsSubscribed,
+    user?.id ? { userId: user.id } : "skip"
+  );
 
   useEffect(() => {
     const yDoc = new Y.Doc();
@@ -236,7 +237,7 @@ export function Editor({
       onChange={onChange}
       initialContent={initialContent}
       editable={editable}
-      isSubscribed={isSubscribed}
+      isSubscribed={!!isSubscribed}
     />
   );
 }
@@ -250,6 +251,7 @@ type BlockNoteProps = {
   onChange: (value: string) => void;
   initialContent?: string;
   editable?: boolean;
+  isSubscribed: boolean;
 };
 
 function BlockNote({
