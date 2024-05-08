@@ -29,7 +29,7 @@ export const ProModal = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} className="dialog-overlay">
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden dark:bg-white dark:text-black ">
         <div className="relative bg-white text-slate-900 p-6 sm:p-8  ">
           <div className="absolute inset-0 bg-white dark:opacity-30"></div>

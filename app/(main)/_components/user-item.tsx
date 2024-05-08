@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 export const UserItem = () => {
   const { user } = useUser();
   const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
-    userId: user?.id,
+    userId: user?.id || "",
   });
 
   return (
