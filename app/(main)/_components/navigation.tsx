@@ -269,18 +269,6 @@ export const Navigation = () => {
               <TrashBox />
             </PopoverContent>
           </Popover>
-
-          <Button
-            onClick={handleUpgrade}
-            disabled={portalPending}
-            variant="link"
-            size="sm"
-            className="ml-auto"
-          >
-            {" "}
-            <Banknote className="h-4 w-4 mr-2" />
-            {isSubscribed ? "Manage Subscription" : "Upgrade to Pro"}
-          </Button>
         </div>
         <div
           onMouseDown={handleMouseDown}

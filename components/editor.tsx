@@ -24,6 +24,11 @@ import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
 import { LanguagesIcon, WandIcon } from "lucide-react";
 
+import { Lock } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-react";
+
 interface TextItem {
   type: "text";
   text: string;
@@ -161,12 +166,22 @@ const aiAssistantItem = (editor: BlockNoteEditor) => ({
   subtext: "Use AI to autocomplete text based on current context.",
 });
 
+const LockedAIAssistanceItem = () => ({
+  title: "AI Features",
+  onItemClick: () => {},
+  aliases: ["ai-features", "locked-ai-features"],
+  group: "AI Tools",
+  icon: <Lock width={24} height={24} className="text-red-500" />,
+  subtext: "Upgrade to Pro to unlock additional AI features.",
+  className: "opacity-50 cursor-not-allowed",
+});
 const getCustomSlashMenuItems = (
-  editor: BlockNoteEditor
+  editor: BlockNoteEditor,
+  isSubscribed: boolean
 ): DefaultReactSuggestionItem[] => [
   ...getDefaultReactSlashMenuItems(editor),
   aiAssistantItem(editor),
-  aiTranslateItem(editor),
+  ...(isSubscribed ? [aiTranslateItem(editor)] : [LockedAIAssistanceItem()]),
 ];
 
 interface EditorProps {
@@ -185,6 +200,11 @@ export function Editor({
   const [provider, setProvider] = useState<any>();
   const { resolvedTheme } = useTheme();
   const { edgestore } = useEdgeStore();
+
+  const { user } = useUser();
+  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
+    userId: user?.id,
+  });
 
   useEffect(() => {
     const yDoc = new Y.Doc();
@@ -216,6 +236,7 @@ export function Editor({
       onChange={onChange}
       initialContent={initialContent}
       editable={editable}
+      isSubscribed={isSubscribed}
     />
   );
 }
@@ -240,6 +261,7 @@ function BlockNote({
   editable,
   doc,
   provider,
+  isSubscribed,
 }: BlockNoteProps) {
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
@@ -283,7 +305,10 @@ function BlockNote({
         <SuggestionMenuController
           triggerCharacter={"/"}
           getItems={async (query) =>
-            filterSuggestionItems(getCustomSlashMenuItems(editor), query)
+            filterSuggestionItems(
+              getCustomSlashMenuItems(editor, isSubscribed),
+              query
+            )
           }
         />
       </BlockNoteView>

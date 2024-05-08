@@ -64,8 +64,27 @@ export const UserItem = () => {
             </div>
           </div>
           {isSubscribed && (
-            <Badge variant="secondary" className="mt-1 w-32 p-4">
-              ⚡️ Pro Member
+            <Badge
+              size="sm"
+              className="mt-1 w-32 p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              <span className="flex items-center space-x-1">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+                <span className="font-semibold">Pro Member</span>
+              </span>
             </Badge>
           )}
         </div>
