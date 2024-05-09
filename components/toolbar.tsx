@@ -1,14 +1,7 @@
 "use client";
 
 import { ElementRef, useRef, useState } from "react";
-import {
-  ImageIcon,
-  Smile,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  MessageCircleIcon,
-} from "lucide-react";
+import { ImageIcon, Smile, X, MessageCircleIcon } from "lucide-react";
 import { useMutation } from "convex/react";
 import TextareaAutosize from "react-textarea-autosize";
 import { useCoverImage } from "@/hooks/use-cover-image";

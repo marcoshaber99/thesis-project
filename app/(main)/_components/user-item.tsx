@@ -1,20 +1,17 @@
 "use client";
 
-import { ChevronsLeftRight } from "lucide-react";
+import { ChevronsLeftRight, Star } from "lucide-react";
 import { useUser, SignOutButton } from "@clerk/clerk-react";
-
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Badge } from "@/components/ui/badge";
 
 export const UserItem = () => {
   const { user } = useUser();
@@ -40,7 +37,6 @@ export const UserItem = () => {
           <ChevronsLeftRight className="rotate-90 ml-2 text-muted-foreground h-4 w-4" />
         </div>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent
         className="w-80"
         align="start"
@@ -63,27 +59,17 @@ export const UserItem = () => {
               </p>
             </div>
           </div>
-          {isSubscribed && (
-            <Badge className="mt-1 w-32 p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-              <span className="flex items-center space-x-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-                <span className="font-semibold">Pro Member</span>
+          <div className="flex items-center space-x-2">
+            {isSubscribed ? (
+              <>
+                <span className="text-sm font-medium"> 🚀 Pro Member</span>
+              </>
+            ) : (
+              <span className="text-sm font-medium text-muted-foreground">
+                Free Tier
               </span>
-            </Badge>
-          )}
+            )}
+          </div>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem

@@ -14,19 +14,7 @@ export default function Footer({ className }: FooterProps) {
             className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
             href="/docs/getting-started"
           >
-            Docs
-          </Link>
-          <Link
-            className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
-            href="#"
-          >
-            About
-          </Link>
-          <Link
-            className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
-            href="#"
-          >
-            Contact
+            Documentation
           </Link>
         </nav>
       </div>

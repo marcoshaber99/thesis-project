@@ -1,16 +1,64 @@
----
-title: Getting Started
----
-
 # Getting Started
 
-Welcome to our documentation! This guide will help you get started with Harmony.
+To get started with Harmony, follow these steps:
 
 ## Prerequisites
 
-Before you begin, make sure you have the following prerequisites installed:
+Make sure you have the following prerequisites installed on your machine:
 
-- Node.js
+- Node.js (version 18 or higher)
 - Git
 
 ## Installation
+
+1. Clone the Harmony repository from GitHub:
+
+   ```bash
+   git clone https://github.com/marcoshaber99/thesis-project.git
+   ```
+
+2. Navigate to the project directory
+
+   ```bash
+   cd harmony
+   ```
+
+3. Install the dependencies:
+
+   ```bash
+   npm install
+   ```
+
+4. Set up the required environment variables:
+
+- Create a .env.local file in the root directory.
+- Add the following variables and replace the placeholders with your own values:
+
+  ```java
+  CONVEX_DEPLOYMENT=your-convex-deployment
+  NEXT_PUBLIC_CONVEX_URL=your-convex-url
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-publishable-key
+  CLERK_SECRET_KEY=your-clerk-secret-key
+  EDGE_STORE_ACCESS_KEY=your-edgestore-access-key
+  EDGE_STORE_SECRET_KEY=your-edgestore-secret-key
+  LIVEBLOCKS_SECRET_KEY=your-liveblocks-secret-key
+  OPENAI_API_KEY=your-openai-api-key
+  KV_URL=your-kv-url
+  KV_REST_API_URL=your-kv-rest-api-url
+  KV_REST_API_TOKEN=your-kv-rest-api-token
+  KV_REST_API_READ_ONLY_TOKEN=your-kv-rest-api-read-only-token
+  STRIPE_API_KEY=your-stripe-api-key
+  NEXT_PUBLIC_APP_URL=your-app-url
+  STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
+  ```
+
+5. Run the development server
+
+```bash
+npm run dev
+
+```
+
+6. Open your browser and visit http://localhost:3000 to access Harmony.
+
+That's it! You now have Harmony up and running locally on your machine.

@@ -1,8 +1,8 @@
 "use client";
 
 import {
+  Book,
   ChevronsLeft,
-  HeartHandshakeIcon,
   HomeIcon,
   Lock,
   MenuIcon,
@@ -19,7 +19,6 @@ import { useMediaQuery } from "usehooks-ts";
 import { useQuery } from "convex/react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 import { api } from "@/convex/_generated/api";
@@ -42,10 +41,8 @@ import { Navbar } from "./navbar";
 import { NewButton } from "./new-button";
 import { useUser } from "@clerk/clerk-react";
 import { useAction } from "convex/react";
-import { Badge } from "@/components/ui/badge";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { Banknote } from "lucide-react";
 
 export const Navigation = () => {
   const { userMemberships } = useOrganizationList({
@@ -187,6 +184,8 @@ export const Navigation = () => {
       setPortalPending(false);
     }
   };
+  const hasOrganizations =
+    userMemberships?.data && userMemberships.data.length > 0;
 
   return (
     <>
@@ -236,25 +235,33 @@ export const Navigation = () => {
             }}
           />
         </div>
-
-        <Item label="Organizations" icon={HomeIcon} />
-        {userMemberships?.data?.map((mem) => (
+        {hasOrganizations && (
           <>
-            <div key={mem.organization.id} className="ml-1">
-              <Item label={mem.organization.name} icon={Users} />
-              <DocumentList organizationId={mem.organization.id} />
-              <Item
-                onClick={() => handleCreate(mem.organization.id)}
-                icon={Plus}
-                label="Add a page"
-              />
-            </div>
+            <Item
+              label="Organizations"
+              icon={HomeIcon}
+              className="dark:text-emerald-100/70"
+            />
+            {userMemberships?.data?.map((mem) => (
+              <div key={mem.organization.id} className="ml-1">
+                <Item label={mem.organization.name} icon={Users} />
+                <DocumentList organizationId={mem.organization.id} />
+                <Item
+                  onClick={() => handleCreate(mem.organization.id)}
+                  icon={Plus}
+                  label="Add a page"
+                />
+              </div>
+            ))}
           </>
-        ))}
-
+        )}
         <div className="mt-4">
           <div>
-            <Item label="Private" icon={Lock} />
+            <Item
+              label="Private"
+              icon={Lock}
+              className="dark:text-orange-100/70"
+            />
           </div>
           <DocumentList isPrivate />
           <Item onClick={() => handleCreate()} icon={Plus} label="Add a page" />
@@ -269,6 +276,13 @@ export const Navigation = () => {
               <TrashBox />
             </PopoverContent>
           </Popover>
+        </div>
+        <div className="mt-auto mb-4">
+          <Item
+            onClick={() => router.push("/docs/introduction")}
+            icon={Book}
+            label="Documentation"
+          />
         </div>
         <div
           onMouseDown={handleMouseDown}

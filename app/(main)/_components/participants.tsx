@@ -55,5 +55,3 @@ export const Participants = ({
     </div>
   );
 };
-
-// ...

@@ -5,7 +5,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { Label } from "@/components/ui/label";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
-import { Banknote } from "lucide-react";
+import { Banknote, Cog, Rocket } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -65,10 +65,21 @@ export const SettingsModal = () => {
             className="w-full dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
           >
             <div className="flex items-center space-x-2">
-              <Banknote className="h-5 w-5 text-yellow-500 group-hover:text-yellow-600 transition-colors duration-200" />
-              <span className="text-sm font-medium text-white   group-hover:text-primary transition-colors duration-200">
-                {isSubscribed ? "Manage Subscription" : "Upgrade to Pro"}
-              </span>
+              {isSubscribed ? (
+                <>
+                  <Cog className="h-5 w-5  text-yellow-500 group-hover:text-yellow-600 transition-colors duration-200" />
+                  <span className="text-sm font-medium text-white group-hover:text-primary transition-colors duration-200">
+                    Manage Subscription
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Rocket className="h-5 w-5 text-yellow-500 group-hover:text-yellow-600 transition-colors duration-200" />
+                  <span className="text-sm font-medium text-white group-hover:text-primary transition-colors duration-200">
+                    Upgrade to Pro
+                  </span>
+                </>
+              )}
             </div>
           </Button>
         </div>
