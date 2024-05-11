@@ -74,11 +74,11 @@ export default function Pricing() {
             <ul className="space-y-4 text-gray-500 dark:text-gray-400 mb-8">
               <li className="flex items-center">
                 <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Unlimited private notes
+                Unlimited private documents
               </li>
               <li className="flex items-center">
                 <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Max 2 notes per team
+                Limit of 2 documents per team
               </li>
               <li className="flex items-center">
                 <CheckIcon className="mr-2 h-6 w-6 fill-current" />
@@ -108,11 +108,11 @@ export default function Pricing() {
             <ul className="space-y-4 mb-8">
               <li className="flex items-center">
                 <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Unlimited private notes
+                Unlimited private documents
               </li>
               <li className="flex items-center">
                 <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Unlimited team notes
+                Unlimited team documents
               </li>
               <li className="flex items-center">
                 <CheckIcon className="mr-2 h-6 w-6 fill-current" />

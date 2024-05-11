@@ -22,7 +22,8 @@ const Heading = () => {
               <Image src="./logo.svg" width="200" height="100" alt="Logo" />
             </div>
             <p className="mx-auto max-w-[700px] text-gray-700 md:text-xl dark:text-gray-300">
-              Create, communicate, and collaborate seamlessly — all in one place
+              Create, communicate, and collaborate seamlessly — all in one
+              place.
             </p>
           </div>
           <div className="flex justify-center space-x-4">

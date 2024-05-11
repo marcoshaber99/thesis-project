@@ -150,7 +150,7 @@ export const Navigation = () => {
     })
       .then((documentId) => {
         if (documentId) {
-          toast.success("New note created");
+          toast.success("New note created!");
           router.push(`/documents/${documentId}`);
         }
       })

@@ -50,7 +50,7 @@ const DocumentsPage = () => {
         className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-6 py-3 shadow-md hover:from-blue-600 hover:to-blue-700 transition duration-300 ease-in-out"
       >
         <PlusCircle className="h-5 w-5 mr-2" />
-        Create a Note
+        Create a document
       </Button>
     </div>
   );
