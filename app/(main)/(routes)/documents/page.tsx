@@ -29,7 +29,7 @@ const DocumentsPage = () => {
   return (
     <div className="h-full flex flex-col items-center justify-center space-y-8 px-4">
       <Image
-        src="think.svg"
+        src="think-light.svg"
         height="300"
         width="300"
         alt="Empty"
