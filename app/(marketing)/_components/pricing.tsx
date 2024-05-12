@@ -57,7 +57,7 @@ export default function Pricing() {
             Pricing
           </h2>
           <p className="mt-4 text-gray-500 dark:text-gray-400">
-            Choose the plan that&apos;s right for your business.
+            Choose the plan that&apos;s right for you.
           </p>
         </div>
         <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
