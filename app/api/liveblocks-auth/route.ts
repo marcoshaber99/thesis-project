@@ -58,6 +58,6 @@ function generateColorFromUserId(userId: string): string {
   }
 
   // Convert the hash to a hex color code
-  const color = `hsl(${hash % 360}, 100%, 50%)`;
+  const color = `hsl(${hash % 360}, 100%, 80%)`; // Increased lightness to 80%
   return color;
 }

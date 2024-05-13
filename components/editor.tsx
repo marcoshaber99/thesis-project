@@ -277,7 +277,7 @@ function BlockNote({
       fragment: doc.getXmlFragment("document-store"),
       user: {
         name: userInfo?.name || "Anonymous",
-        color: userInfo?.color || "#b4e6b4",
+        color: userInfo?.color || "#ffb600",
       },
     },
     uploadFile,
