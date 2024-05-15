@@ -1,5 +1,4 @@
 "use client";
-
 import {
   BlockNoteEditor,
   filterSuggestionItems,
@@ -7,7 +6,6 @@ import {
 } from "@blocknote/core";
 import { toast } from "sonner";
 import "@blocknote/core/fonts/inter.css";
-
 import {
   BlockNoteView,
   DefaultReactSuggestionItem,
@@ -23,11 +21,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
 import { LanguagesIcon, WandIcon } from "lucide-react";
-
 import { Lock } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-react";
+import { BeatLoader } from "react-spinners";
 
 interface TextItem {
   type: "text";
@@ -35,7 +33,11 @@ interface TextItem {
   styles?: { bold?: boolean; italic?: boolean; [key: string]: any };
 }
 
-const aiTranslateItem = (editor: BlockNoteEditor) => ({
+// aiTranslateItem function
+const aiTranslateItem = (
+  editor: BlockNoteEditor,
+  setIsLoading: (isLoading: boolean) => void
+) => ({
   title: "AI Translate",
   onItemClick: async () => {
     const currentPosition = editor.getTextCursorPosition();
@@ -47,49 +49,48 @@ const aiTranslateItem = (editor: BlockNoteEditor) => ({
       const content = (currentPosition.block.content as TextItem[])
         .map((item) => item.text)
         .join(" ");
-
       const targetLanguage = prompt(
         "Enter the target language (e.g., 'French', 'Spanish', 'German'):"
       );
-
       if (!targetLanguage) {
         return;
       }
-
+      setIsLoading(true);
       try {
         const response = await fetch("/api/translate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: content, targetLanguage }),
         });
-
         if (response.status === 429) {
           const { retryAfter } = await response.json();
           toast.error(
             `Rate limit exceeded. Please try again in ${retryAfter}.`,
             { position: "top-center" }
           );
+          setIsLoading(false);
           return;
         }
-
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Failed to fetch AI translation:", errorText);
           toast.error(
             "An error occurred during your request. Please try again."
           );
+          setIsLoading(false);
           return;
         }
-
         const translation = await response.json();
         const translationBlock: PartialBlock = {
           type: "paragraph",
           content: [{ type: "text", text: translation, styles: {} }],
         };
         editor.insertBlocks([translationBlock], currentPosition.block, "after");
+        setIsLoading(false);
       } catch (error) {
         console.error("Fetch error:", error);
         toast.error("An error occurred during your request. Please try again.");
+        setIsLoading(false);
       }
     }
   },
@@ -105,7 +106,11 @@ const aiTranslateItem = (editor: BlockNoteEditor) => ({
   subtext: "Translate selected text using AI.",
 });
 
-const aiAssistantItem = (editor: BlockNoteEditor) => ({
+// aiAssistantItem function
+const aiAssistantItem = (
+  editor: BlockNoteEditor,
+  setIsLoading: (isLoading: boolean) => void
+) => ({
   title: "AI Assistant",
   onItemClick: async () => {
     const currentPosition = editor.getTextCursorPosition();
@@ -117,40 +122,42 @@ const aiAssistantItem = (editor: BlockNoteEditor) => ({
       const content = (currentPosition.block.content as TextItem[])
         .map((item) => item.text)
         .join(" ");
+      setIsLoading(true);
       try {
         const response = await fetch("/api/completion", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: content }),
         });
-
         if (response.status === 429) {
           const { retryAfter } = await response.json();
           toast.error(
             `Rate limit exceeded. Please try again in ${retryAfter}.`,
             { position: "top-center" }
           );
+          setIsLoading(false);
           return;
         }
-
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Failed to fetch AI completion:", errorText);
           toast.error(
             "An error occurred during your request. Please try again."
           );
+          setIsLoading(false);
           return;
         }
-
         const completion = await response.json();
         const completionBlock: PartialBlock = {
           type: "paragraph",
           content: [{ type: "text", text: completion, styles: {} }],
         };
         editor.insertBlocks([completionBlock], currentPosition.block, "after");
+        setIsLoading(false);
       } catch (error) {
         console.error("Fetch error:", error);
         toast.error("An error occurred during your request. Please try again.");
+        setIsLoading(false);
       }
     }
   },
@@ -175,13 +182,17 @@ const LockedAIAssistanceItem = () => ({
   subtext: "Upgrade to Pro to unlock additional AI features.",
   className: "opacity-50 cursor-not-allowed",
 });
+
 const getCustomSlashMenuItems = (
   editor: BlockNoteEditor,
-  isSubscribed: boolean
+  isSubscribed: boolean,
+  setIsLoading: (isLoading: boolean) => void
 ): DefaultReactSuggestionItem[] => [
   ...getDefaultReactSlashMenuItems(editor),
-  aiAssistantItem(editor),
-  ...(isSubscribed ? [aiTranslateItem(editor)] : [LockedAIAssistanceItem()]),
+  aiAssistantItem(editor, setIsLoading),
+  ...(isSubscribed
+    ? [aiTranslateItem(editor, setIsLoading)]
+    : [LockedAIAssistanceItem()]),
 ];
 
 interface EditorProps {
@@ -200,7 +211,6 @@ export function Editor({
   const [provider, setProvider] = useState<any>();
   const { resolvedTheme } = useTheme();
   const { edgestore } = useEdgeStore();
-
   const { user } = useUser();
   const isSubscribed = useQuery(
     api.subscriptions.getIsSubscribed,
@@ -265,9 +275,9 @@ function BlockNote({
   provider,
   isSubscribed,
 }: BlockNoteProps) {
+  const [isLoading, setIsLoading] = useState(false);
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
-
   const editor: BlockNoteEditor = useCreateBlockNote({
     initialContent: initialContent
       ? (JSON.parse(initialContent) as PartialBlock[])
@@ -296,6 +306,7 @@ function BlockNote({
       };
     }
   }, [editor, handleEditorChange, editable]);
+
   return (
     <div>
       <BlockNoteView
@@ -304,11 +315,20 @@ function BlockNote({
         editable={editable}
         slashMenu={false}
       >
+        {isLoading ? (
+          <div className="flex items-center h-12 ml-20">
+            <BeatLoader
+              color="currentColor"
+              size={8}
+              className="text-purple-700 dark:text-cyan-400"
+            />
+          </div>
+        ) : null}
         <SuggestionMenuController
           triggerCharacter={"/"}
           getItems={async (query) =>
             filterSuggestionItems(
-              getCustomSlashMenuItems(editor, isSubscribed),
+              getCustomSlashMenuItems(editor, isSubscribed, setIsLoading),
               query
             )
           }
