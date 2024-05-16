@@ -18,6 +18,7 @@ import type * as documents from "../documents.js";
 import type * as http from "../http.js";
 import type * as stripe from "../stripe.js";
 import type * as subscriptions from "../subscriptions.js";
+import type * as surveys from "../surveys.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   stripe: typeof stripe;
   subscriptions: typeof subscriptions;
+  surveys: typeof surveys;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

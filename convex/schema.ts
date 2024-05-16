@@ -1,3 +1,5 @@
+// convex/schema.ts
+
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -27,4 +29,17 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_subscription", ["stripeSubscriptionId"]),
+
+  surveys: defineTable({
+    attractiveness: v.string(),
+    perspicuity: v.string(),
+    efficiency: v.string(),
+    dependability: v.string(),
+    stimulation: v.string(),
+    novelty: v.string(),
+    feedback: v.string(),
+    age: v.string(),
+    gender: v.string(),
+    createdAt: v.number(),
+  }),
 });

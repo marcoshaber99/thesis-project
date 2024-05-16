@@ -34,7 +34,7 @@ const Logo = () => {
         alt="Logo"
         className="hidden dark:block"
       />
-      <Link className="text-2xl font-bold tracking-tight" href="#">
+      <Link className="text-2xl font-bold tracking-tight" href="/">
         Harmony
       </Link>
       {isSubscribed && (
