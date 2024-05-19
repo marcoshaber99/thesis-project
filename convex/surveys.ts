@@ -82,5 +82,7 @@ export const getResults = query(async (ctx) => {
     gender[result.gender]++;
   });
 
-  return { satisfaction, age, gender };
+  const feedback = results.map((result) => result.feedback);
+
+  return { satisfaction, age, gender, feedback };
 });

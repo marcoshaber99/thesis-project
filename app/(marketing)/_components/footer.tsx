@@ -1,4 +1,3 @@
-// app/(marketing)/_components/footer.tsx
 import Link from "next/link";
 
 interface FooterProps {
@@ -26,7 +25,7 @@ export default function Footer({ className }: FooterProps) {
             className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
             href="/dashboard"
           >
-            Dashboard
+            Analytics
           </Link>
         </nav>
       </div>
