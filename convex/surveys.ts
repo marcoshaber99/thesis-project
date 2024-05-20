@@ -12,7 +12,7 @@ type SurveyFields =
 type SurveyResult = {
   _id: string;
   _creationTime: number;
-  userId: string;
+  userId?: string;
   attractiveness: string;
   perspicuity: string;
   efficiency: string;
@@ -27,7 +27,7 @@ type SurveyResult = {
 
 export const submitSurvey = mutation({
   args: {
-    userId: v.string(),
+    userId: v.optional(v.string()),
     attractiveness: v.string(),
     perspicuity: v.string(),
     efficiency: v.string(),
