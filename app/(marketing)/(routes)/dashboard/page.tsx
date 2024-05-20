@@ -76,17 +76,20 @@ export default function DashboardPage() {
     { name: "Other", value: surveyData.gender.other },
   ];
 
+  // Filter out empty feedback entries and apply the search query
   const feedbackData = surveyData.feedback
     .map((feedback: string, index: number) => ({
       id: index,
       feedback,
       sentiment: analyzeSentiment(feedback),
     }))
-    .filter((entry) =>
-      entry.feedback.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (entry) =>
+        entry.feedback &&
+        entry.feedback.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const totalFeedback = surveyData.feedback.length;
+  const totalFeedback = surveyData.feedback.filter((f) => f).length;
   const averageRating =
     satisfactionData.reduce((sum, field) => sum + field.score, 0) /
     satisfactionData.length;
@@ -98,17 +101,8 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-8">Analytics Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Feedback</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold">{totalFeedback}</div>
-          </CardContent>
-        </Card>
-      </div>
+      <h1 className="text-4xl font-bold mb-8">Survey Analytics</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8"></div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <Card>
           <CardHeader>
@@ -200,22 +194,26 @@ export default function DashboardPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="max-h-96 overflow-y-auto">
-              {feedbackData.map((entry) => (
-                <div
-                  key={entry.id}
-                  className={`mb-4 p-4 rounded-lg ${
-                    entry.sentiment === "positive"
-                      ? "bg-green-100 text-green-800"
-                      : entry.sentiment === "negative"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  <p>{entry.feedback}</p>
-                </div>
-              ))}
-            </div>
+            {feedbackData.length > 0 ? (
+              <div className="max-h-96 overflow-y-auto">
+                {feedbackData.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className={`mb-4 p-4 rounded-lg ${
+                      entry.sentiment === "positive"
+                        ? "bg-green-100 text-green-800"
+                        : entry.sentiment === "negative"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    <p>{entry.feedback}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No feedback available.</p>
+            )}
           </CardContent>
         </Card>
       </div>

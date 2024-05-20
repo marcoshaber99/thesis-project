@@ -29,6 +29,7 @@ export default defineSchema({
     .index("by_subscription", ["stripeSubscriptionId"]),
 
   surveys: defineTable({
+    userId: v.string(),
     attractiveness: v.string(),
     perspicuity: v.string(),
     efficiency: v.string(),

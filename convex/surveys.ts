@@ -1,5 +1,3 @@
-// convex/surveys.ts
-
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -14,6 +12,7 @@ type SurveyFields =
 type SurveyResult = {
   _id: string;
   _creationTime: number;
+  userId: string;
   attractiveness: string;
   perspicuity: string;
   efficiency: string;
@@ -28,6 +27,7 @@ type SurveyResult = {
 
 export const submitSurvey = mutation({
   args: {
+    userId: v.string(),
     attractiveness: v.string(),
     perspicuity: v.string(),
     efficiency: v.string(),
@@ -82,7 +82,7 @@ export const getResults = query(async (ctx) => {
     gender[result.gender]++;
   });
 
-  const feedback = results.map((result) => result.feedback);
+  const feedback = results.map((result) => result.feedback).filter((f) => f);
 
-  return { satisfaction, age, gender, feedback };
+  return { satisfaction, age, gender, feedback, results };
 });

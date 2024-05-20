@@ -5,10 +5,13 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@clerk/clerk-react";
 
 type Gender = "male" | "female" | "other";
 
 export default function SurveyPage() {
+  const { user } = useUser();
+
   const [responses, setResponses] = useState<{
     attractiveness: string;
     perspicuity: string;
@@ -35,8 +38,12 @@ export default function SurveyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.id) {
+      toast.error("User is not authenticated");
+      return;
+    }
     try {
-      await submitSurvey(responses);
+      await submitSurvey({ ...responses, userId: user.id });
       toast.success("Survey submitted successfully!");
       setResponses({
         attractiveness: "4",
