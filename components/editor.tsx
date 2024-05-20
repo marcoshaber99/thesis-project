@@ -4,7 +4,7 @@ import {
   filterSuggestionItems,
   PartialBlock,
 } from "@blocknote/core";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import "@blocknote/core/fonts/inter.css";
 import {
   BlockNoteView,
@@ -20,12 +20,14 @@ import { useRoom, useSelf } from "@/liveblocks.config";
 import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
-import { LanguagesIcon, WandIcon } from "lucide-react";
+import { LanguagesIcon, WandIcon, FileTextIcon } from "lucide-react";
 import { Lock } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-react";
 import { BeatLoader } from "react-spinners";
+import { nanoid } from "nanoid";
+import AiToast from "./ai-toast";
 
 interface TextItem {
   type: "text";
@@ -33,10 +35,11 @@ interface TextItem {
   styles?: { bold?: boolean; italic?: boolean; [key: string]: any };
 }
 
-// aiTranslateItem function
 const aiTranslateItem = (
   editor: BlockNoteEditor,
-  setIsLoading: (isLoading: boolean) => void
+  setIsLoading: (isLoading: boolean) => void,
+  setTempContent: (content: PartialBlock) => void,
+  showToast: () => void
 ) => ({
   title: "AI Translate",
   onItemClick: async () => {
@@ -82,10 +85,13 @@ const aiTranslateItem = (
         }
         const translation = await response.json();
         const translationBlock: PartialBlock = {
+          id: nanoid(), // Generate a unique id for the block
           type: "paragraph",
           content: [{ type: "text", text: translation, styles: {} }],
         };
+        setTempContent(translationBlock);
         editor.insertBlocks([translationBlock], currentPosition.block, "after");
+        showToast();
         setIsLoading(false);
       } catch (error) {
         console.error("Fetch error:", error);
@@ -106,10 +112,11 @@ const aiTranslateItem = (
   subtext: "Translate selected text using AI.",
 });
 
-// aiAssistantItem function
 const aiAssistantItem = (
   editor: BlockNoteEditor,
-  setIsLoading: (isLoading: boolean) => void
+  setIsLoading: (isLoading: boolean) => void,
+  setTempContent: (content: PartialBlock) => void,
+  showToast: () => void
 ) => ({
   title: "AI Assistant",
   onItemClick: async () => {
@@ -149,10 +156,13 @@ const aiAssistantItem = (
         }
         const completion = await response.json();
         const completionBlock: PartialBlock = {
+          id: nanoid(), // Generate a unique id for the block
           type: "paragraph",
           content: [{ type: "text", text: completion, styles: {} }],
         };
+        setTempContent(completionBlock);
         editor.insertBlocks([completionBlock], currentPosition.block, "after");
+        showToast();
         setIsLoading(false);
       } catch (error) {
         console.error("Fetch error:", error);
@@ -173,6 +183,77 @@ const aiAssistantItem = (
   subtext: "Use AI to autocomplete text based on current context.",
 });
 
+const aiSummarizeItem = (
+  editor: BlockNoteEditor,
+  setIsLoading: (isLoading: boolean) => void,
+  setTempContent: (content: PartialBlock) => void,
+  showToast: () => void
+) => ({
+  title: "AI Summarize",
+  onItemClick: async () => {
+    const currentPosition = editor.getTextCursorPosition();
+    if (
+      currentPosition &&
+      currentPosition.block &&
+      currentPosition.block.content
+    ) {
+      const content = (currentPosition.block.content as TextItem[])
+        .map((item) => item.text)
+        .join(" ");
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: content }),
+        });
+        if (response.status === 429) {
+          const { retryAfter } = await response.json();
+          toast.error(
+            `Rate limit exceeded. Please try again in ${retryAfter}.`,
+            { position: "top-center" }
+          );
+          setIsLoading(false);
+          return;
+        }
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Failed to fetch AI summary:", errorText);
+          toast.error(
+            "An error occurred during your request. Please try again."
+          );
+          setIsLoading(false);
+          return;
+        }
+        const summary = await response.json();
+        const summaryBlock: PartialBlock = {
+          id: nanoid(), // Generate a unique id for the block
+          type: "paragraph",
+          content: [{ type: "text", text: summary, styles: {} }],
+        };
+        setTempContent(summaryBlock);
+        editor.insertBlocks([summaryBlock], currentPosition.block, "after");
+        showToast();
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("An error occurred during your request. Please try again.");
+        setIsLoading(false);
+      }
+    }
+  },
+  aliases: ["summarize", "ai-summarize"],
+  group: "AI Tools",
+  icon: (
+    <FileTextIcon
+      width={24}
+      height={24}
+      className="dark:text-cyan-400 text-purple-700 "
+    />
+  ),
+  subtext: "Summarize selected text using AI.",
+});
+
 const LockedAIAssistanceItem = () => ({
   title: "AI Features",
   onItemClick: () => {},
@@ -186,12 +267,17 @@ const LockedAIAssistanceItem = () => ({
 const getCustomSlashMenuItems = (
   editor: BlockNoteEditor,
   isSubscribed: boolean,
-  setIsLoading: (isLoading: boolean) => void
+  setIsLoading: (isLoading: boolean) => void,
+  setTempContent: (content: PartialBlock) => void,
+  showToast: () => void
 ): DefaultReactSuggestionItem[] => [
   ...getDefaultReactSlashMenuItems(editor),
-  aiAssistantItem(editor, setIsLoading),
+  aiAssistantItem(editor, setIsLoading, setTempContent, showToast),
   ...(isSubscribed
-    ? [aiTranslateItem(editor, setIsLoading)]
+    ? [
+        aiTranslateItem(editor, setIsLoading, setTempContent, showToast),
+        aiSummarizeItem(editor, setIsLoading, setTempContent, showToast),
+      ]
     : [LockedAIAssistanceItem()]),
 ];
 
@@ -217,6 +303,29 @@ export function Editor({
     user?.id ? { userId: user.id } : "skip"
   );
 
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [tempContent, setTempContent] = useState<PartialBlock | null>(null);
+  const [editorInstance, setEditorInstance] = useState<BlockNoteEditor | null>(
+    null
+  );
+
+  const handleToastAccept = () => {
+    setTempContent(null); // Keep the content since it's already in the editor
+    setShowToast(false);
+  };
+
+  const handleToastIgnore = () => {
+    if (tempContent && tempContent.id && editorInstance) {
+      editorInstance.removeBlocks([{ id: tempContent.id }]); // Use the id to remove the block
+    }
+    setTempContent(null);
+    setShowToast(false);
+  };
+
+  const showToastMessage = () => {
+    setShowToast(true);
+  };
+
   useEffect(() => {
     const yDoc = new Y.Doc();
     const yProvider = new LiveblocksProvider(room, yDoc);
@@ -238,17 +347,25 @@ export function Editor({
   }
 
   return (
-    <BlockNote
-      doc={doc}
-      provider={provider}
-      room={room}
-      theme={resolvedTheme === "dark" ? "dark" : "light"}
-      uploadFile={handleUpload}
-      onChange={onChange}
-      initialContent={initialContent}
-      editable={editable}
-      isSubscribed={!!isSubscribed}
-    />
+    <div>
+      <BlockNote
+        doc={doc}
+        provider={provider}
+        room={room}
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
+        uploadFile={handleUpload}
+        onChange={onChange}
+        initialContent={initialContent}
+        editable={editable}
+        isSubscribed={!!isSubscribed}
+        setTempContent={setTempContent}
+        showToastMessage={showToastMessage}
+        setEditorInstance={setEditorInstance}
+      />
+      {showToast && (
+        <AiToast onAccept={handleToastAccept} onIgnore={handleToastIgnore} />
+      )}
+    </div>
   );
 }
 
@@ -262,6 +379,9 @@ type BlockNoteProps = {
   initialContent?: string;
   editable?: boolean;
   isSubscribed: boolean;
+  setTempContent: (content: PartialBlock | null) => void;
+  showToastMessage: () => void;
+  setEditorInstance: (editor: BlockNoteEditor) => void;
 };
 
 function BlockNote({
@@ -274,9 +394,11 @@ function BlockNote({
   doc,
   provider,
   isSubscribed,
+  setTempContent,
+  showToastMessage,
+  setEditorInstance,
 }: BlockNoteProps) {
   const [isLoading, setIsLoading] = useState(false);
-  // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
   const editor: BlockNoteEditor = useCreateBlockNote({
     initialContent: initialContent
@@ -307,6 +429,10 @@ function BlockNote({
     }
   }, [editor, handleEditorChange, editable]);
 
+  useEffect(() => {
+    setEditorInstance(editor);
+  }, [editor, setEditorInstance]);
+
   return (
     <div>
       <BlockNoteView
@@ -328,7 +454,13 @@ function BlockNote({
           triggerCharacter={"/"}
           getItems={async (query) =>
             filterSuggestionItems(
-              getCustomSlashMenuItems(editor, isSubscribed, setIsLoading),
+              getCustomSlashMenuItems(
+                editor,
+                isSubscribed,
+                setIsLoading,
+                setTempContent,
+                showToastMessage
+              ),
               query
             )
           }

@@ -1,10 +1,9 @@
 "use client";
 
-import { HeartHandshakeIcon, UserPlus2Icon } from "lucide-react";
+import { UserPlus2Icon } from "lucide-react";
 import { CreateOrganization } from "@clerk/nextjs";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { FaUserPlus } from "react-icons/fa";
 
 import { Item } from "./item";
 
