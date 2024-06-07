@@ -43,10 +43,6 @@ export const ProModal = () => {
             <ul className="space-y-4">
               <li className="flex items-center space-x-3">
                 <CheckCircle className="h-6 w-6 text-emerald-500" />
-                <span>Unlimited Organizations</span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <CheckCircle className="h-6 w-6 text-emerald-500" />
                 <span>Unlimited Organization Documents</span>
               </li>
               <li className="flex items-center space-x-3">

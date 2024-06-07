@@ -19,11 +19,42 @@ import {
   PieChart,
   Pie,
   Cell,
+  LineChart,
+  Line,
+  ComposedChart,
+  Area,
 } from "recharts";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+
+type Gender = "male" | "female" | "other";
+
+interface SurveyResult {
+  _id: string;
+  _creationTime: number;
+  userId?: string;
+  attractiveness: string;
+  perspicuity: string;
+  efficiency: string;
+  dependability: string;
+  stimulation: string;
+  novelty: string;
+  feedback: string;
+  age: string;
+  gender: Gender;
+  createdAt: number;
+}
+
+interface SatisfactionData {
+  attractiveness: number[];
+  perspicuity: number[];
+  efficiency: number[];
+  dependability: number[];
+  stimulation: number[];
+  novelty: number[];
+}
 
 export default function DashboardPage() {
   const surveyData = useQuery(api.surveys.getResults);
@@ -37,25 +68,22 @@ export default function DashboardPage() {
     );
   }
 
-  const satisfactionFields: {
-    name: string;
-    key: keyof typeof surveyData.satisfaction;
-  }[] = [
+  const satisfactionFields = [
     { name: "Attractiveness", key: "attractiveness" },
     { name: "Perspicuity", key: "perspicuity" },
     { name: "Efficiency", key: "efficiency" },
     { name: "Dependability", key: "dependability" },
     { name: "Stimulation", key: "stimulation" },
     { name: "Novelty", key: "novelty" },
-  ];
+  ] as const;
 
   const satisfactionData = satisfactionFields.map((field) => {
     const totalScore = surveyData.satisfaction[field.key].reduce(
-      (sum, count, index) => sum + count * (index + 1),
+      (sum: number, count: number, index: number) => sum + count * (index + 1),
       0
     );
     const totalResponses = surveyData.satisfaction[field.key].reduce(
-      (sum, count) => sum + count,
+      (sum: number, count: number) => sum + count,
       0
     );
     const averageScore = totalResponses > 0 ? totalScore / totalResponses : 0;
@@ -76,7 +104,6 @@ export default function DashboardPage() {
     { name: "Other", value: surveyData.gender.other },
   ];
 
-  // Filter out empty feedback entries and apply the search query
   const feedbackData = surveyData.feedback
     .map((feedback: string, index: number) => ({
       id: index,
@@ -89,7 +116,7 @@ export default function DashboardPage() {
         entry.feedback.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const totalFeedback = surveyData.feedback.filter((f) => f).length;
+  const totalFeedback = surveyData.feedback.filter((f: string) => f).length;
   const averageRating =
     satisfactionData.reduce((sum, field) => sum + field.score, 0) /
     satisfactionData.length;
@@ -98,6 +125,72 @@ export default function DashboardPage() {
       totalFeedback) *
       100
   );
+
+  const averageSatisfactionByAge = ageData.map((ageGroup) => {
+    const relevantResults = surveyData.results.filter(
+      (result: SurveyResult) => result.age === ageGroup.name
+    );
+    const totalScore = relevantResults.reduce(
+      (sum, result) =>
+        sum +
+        satisfactionFields.reduce(
+          (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
+          0
+        ),
+      0
+    );
+    const totalResponses = relevantResults.length * satisfactionFields.length;
+    return {
+      age: ageGroup.name,
+      score: totalResponses > 0 ? totalScore / totalResponses : 0,
+    };
+  });
+
+  const averageSatisfactionByGender = Object.keys(surveyData.gender).map(
+    (gender) => {
+      const relevantResults = surveyData.results.filter(
+        (result: SurveyResult) => result.gender === gender
+      );
+      const totalScore = relevantResults.reduce(
+        (sum, result) =>
+          sum +
+          satisfactionFields.reduce(
+            (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
+            0
+          ),
+        0
+      );
+      const totalResponses = relevantResults.length * satisfactionFields.length;
+      return {
+        gender,
+        score: totalResponses > 0 ? totalScore / totalResponses : 0,
+      };
+    }
+  );
+
+  const averageSatisfactionByAgeAndGender = [];
+  for (const age of ["18-24", "25-29", "30-39", "40-49", "50+"]) {
+    for (const gender of ["male", "female", "other"]) {
+      const relevantResults = surveyData.results.filter(
+        (result: SurveyResult) => result.age === age && result.gender === gender
+      );
+      const totalScore = relevantResults.reduce(
+        (sum, result) =>
+          sum +
+          satisfactionFields.reduce(
+            (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
+            0
+          ),
+        0
+      );
+      const totalResponses = relevantResults.length * satisfactionFields.length;
+      averageSatisfactionByAgeAndGender.push({
+        age,
+        gender,
+        score: totalResponses > 0 ? totalScore / totalResponses : 0,
+      });
+    }
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -214,6 +307,60 @@ export default function DashboardPage() {
             ) : (
               <p>No feedback available.</p>
             )}
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Average Satisfaction by Age Group</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={averageSatisfactionByAge}>
+                <XAxis dataKey="age" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="score" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Average Satisfaction by Gender</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={averageSatisfactionByGender}>
+                <XAxis dataKey="gender" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="score" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Average Satisfaction by Age Group and Gender</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={averageSatisfactionByAgeAndGender}>
+                <XAxis dataKey="age" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="score" fill="#8884d8" />
+                <Line type="monotone" dataKey="score" stroke="#ff7300" />
+                <Area type="monotone" dataKey="score" fill="#8884d8" />
+              </ComposedChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>

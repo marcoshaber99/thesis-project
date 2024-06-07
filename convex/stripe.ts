@@ -66,7 +66,7 @@ export const pay = action({
               name: "Pro Membership",
               description: "Unlimited documents for your organizations",
             },
-            unit_amount: 999, // Price in cents, adjust as needed
+            unit_amount: 999,
             recurring: {
               interval: "month",
             },

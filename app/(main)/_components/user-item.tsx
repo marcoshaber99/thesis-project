@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Badge } from "@/components/ui/badge";
 
 export const UserItem = () => {
   const { user } = useUser();
@@ -62,7 +63,13 @@ export const UserItem = () => {
           <div className="flex items-center space-x-2">
             {isSubscribed ? (
               <>
-                <span className="text-sm font-medium"> 🚀 Pro Member</span>
+                <Badge
+                  variant="outline"
+                  className="flex items-center gap-2 p-2 px-4"
+                >
+                  🚀
+                  <span className="text-sm">Pro Member</span>
+                </Badge>
               </>
             ) : (
               <span className="text-sm font-medium text-muted-foreground">
