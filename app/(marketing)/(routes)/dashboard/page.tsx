@@ -344,26 +344,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Average Satisfaction by Age Group and Gender</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={averageSatisfactionByAgeAndGender}>
-                <XAxis dataKey="age" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="score" fill="#8884d8" />
-                <Line type="monotone" dataKey="score" stroke="#ff7300" />
-                <Area type="monotone" dataKey="score" fill="#8884d8" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
