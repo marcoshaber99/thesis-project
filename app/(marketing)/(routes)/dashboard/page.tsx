@@ -210,12 +210,8 @@ export default function DashboardPage() {
                 outerRadius="80%"
               >
                 <PolarGrid />
-                <PolarAngleAxis dataKey="name" tick={{ fill: "#cccccc" }} />
-                <PolarRadiusAxis
-                  angle={30}
-                  domain={[0, 7]}
-                  tick={{ fill: "#cccccc" }}
-                />
+                <PolarAngleAxis dataKey="name" />
+                <PolarRadiusAxis angle={30} domain={[0, 7]} />
                 <Radar
                   name="Satisfaction"
                   dataKey="score"
@@ -236,8 +232,8 @@ export default function DashboardPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={ageData}>
-                <XAxis dataKey="name" tick={{ fill: "#cccccc" }} />
-                <YAxis tick={{ fill: "#cccccc" }} />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="count" fill="#8884d8" />
@@ -322,8 +318,8 @@ export default function DashboardPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={averageSatisfactionByAge}>
-                <XAxis dataKey="age" tick={{ fill: "#cccccc" }} />
-                <YAxis tick={{ fill: "#cccccc" }} />
+                <XAxis dataKey="age" />
+                <YAxis />
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="score" fill="#8884d8" />
@@ -338,8 +334,8 @@ export default function DashboardPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={averageSatisfactionByGender}>
-                <XAxis dataKey="gender" tick={{ fill: "#cccccc" }} />
-                <YAxis tick={{ fill: "#cccccc" }} />
+                <XAxis dataKey="gender" />
+                <YAxis />
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="score" fill="#8884d8" />
