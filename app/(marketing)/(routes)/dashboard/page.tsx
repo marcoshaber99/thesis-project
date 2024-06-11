@@ -126,71 +126,43 @@ export default function DashboardPage() {
       100
   );
 
-  const averageSatisfactionByAge = ageData.map((ageGroup) => {
-    const relevantResults = surveyData.results.filter(
-      (result: SurveyResult) => result.age === ageGroup.name
-    );
-    const totalScore = relevantResults.reduce(
-      (sum, result) =>
-        sum +
-        satisfactionFields.reduce(
-          (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
-          0
-        ),
-      0
-    );
-    const totalResponses = relevantResults.length * satisfactionFields.length;
-    return {
-      age: ageGroup.name,
-      score: totalResponses > 0 ? totalScore / totalResponses : 0,
-    };
-  });
+  const averageSatisfactionByAge = satisfactionFields.map((field) => ({
+    name: field.name,
+    ...ageData.reduce((acc, ageGroup) => {
+      const relevantResults = surveyData.results.filter(
+        (result: SurveyResult) => result.age === ageGroup.name
+      );
+      const totalScore = relevantResults.reduce(
+        (sum, result) => sum + parseInt(result[field.key], 10),
+        0
+      );
+      const averageScore =
+        relevantResults.length > 0 ? totalScore / relevantResults.length : 0;
+      return {
+        ...acc,
+        [ageGroup.name]: averageScore,
+      };
+    }, {}),
+  }));
 
-  const averageSatisfactionByGender = Object.keys(surveyData.gender).map(
-    (gender) => {
+  const averageSatisfactionByGender = satisfactionFields.map((field) => ({
+    name: field.name,
+    ...Object.keys(surveyData.gender).reduce((acc, gender) => {
       const relevantResults = surveyData.results.filter(
         (result: SurveyResult) => result.gender === gender
       );
       const totalScore = relevantResults.reduce(
-        (sum, result) =>
-          sum +
-          satisfactionFields.reduce(
-            (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
-            0
-          ),
+        (sum, result) => sum + parseInt(result[field.key], 10),
         0
       );
-      const totalResponses = relevantResults.length * satisfactionFields.length;
+      const averageScore =
+        relevantResults.length > 0 ? totalScore / relevantResults.length : 0;
       return {
-        gender,
-        score: totalResponses > 0 ? totalScore / totalResponses : 0,
+        ...acc,
+        [gender]: averageScore,
       };
-    }
-  );
-
-  const averageSatisfactionByAgeAndGender = [];
-  for (const age of ["18-24", "25-29", "30-39", "40-49", "50+"]) {
-    for (const gender of ["male", "female", "other"]) {
-      const relevantResults = surveyData.results.filter(
-        (result: SurveyResult) => result.age === age && result.gender === gender
-      );
-      const totalScore = relevantResults.reduce(
-        (sum, result) =>
-          sum +
-          satisfactionFields.reduce(
-            (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
-            0
-          ),
-        0
-      );
-      const totalResponses = relevantResults.length * satisfactionFields.length;
-      averageSatisfactionByAgeAndGender.push({
-        age,
-        gender,
-        score: totalResponses > 0 ? totalScore / totalResponses : 0,
-      });
-    }
-  }
+    }, {}),
+  }));
 
   return (
     <div className="container mx-auto p-4">
@@ -316,13 +288,30 @@ export default function DashboardPage() {
             <CardTitle>Average Satisfaction by Age Group</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={averageSatisfactionByAge}>
-                <XAxis dataKey="age" />
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart
+                data={averageSatisfactionByAge}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tickFormatter={(value: string) => value}
+                />
                 <YAxis />
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="score" fill="#8884d8" />
+                <Legend verticalAlign="top" height={36} />
+                {ageData.map((ageGroup, index) => (
+                  <Bar
+                    key={ageGroup.name}
+                    dataKey={ageGroup.name}
+                    stackId="a"
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -332,13 +321,30 @@ export default function DashboardPage() {
             <CardTitle>Average Satisfaction by Gender</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={averageSatisfactionByGender}>
-                <XAxis dataKey="gender" />
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart
+                data={averageSatisfactionByGender}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tickFormatter={(value: string) => value}
+                />
                 <YAxis />
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="score" fill="#8884d8" />
+                <Legend verticalAlign="top" height={36} />
+                {Object.keys(surveyData.gender).map((gender, index) => (
+                  <Bar
+                    key={gender}
+                    dataKey={gender}
+                    stackId="a"
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
