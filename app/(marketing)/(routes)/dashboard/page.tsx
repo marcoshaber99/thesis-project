@@ -126,43 +126,89 @@ export default function DashboardPage() {
       100
   );
 
-  const averageSatisfactionByAge = satisfactionFields.map((field) => ({
-    name: field.name,
-    ...ageData.reduce((acc, ageGroup) => {
-      const relevantResults = surveyData.results.filter(
-        (result: SurveyResult) => result.age === ageGroup.name
-      );
-      const totalScore = relevantResults.reduce(
-        (sum, result) => sum + parseInt(result[field.key], 10),
-        0
-      );
-      const averageScore =
-        relevantResults.length > 0 ? totalScore / relevantResults.length : 0;
-      return {
-        ...acc,
-        [ageGroup.name]: averageScore,
-      };
-    }, {}),
-  }));
+  const averageSatisfactionByAge = ageData.map((ageGroup) => {
+    const relevantResults = surveyData.results.filter(
+      (result: SurveyResult) => result.age === ageGroup.name
+    );
+    const totalScore = relevantResults.reduce(
+      (sum, result) =>
+        sum +
+        satisfactionFields.reduce(
+          (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
+          0
+        ),
+      0
+    );
+    const totalResponses = relevantResults.length * satisfactionFields.length;
+    return {
+      age: ageGroup.name,
+      score: totalResponses > 0 ? totalScore / totalResponses : 0,
+    };
+  });
 
-  const averageSatisfactionByGender = satisfactionFields.map((field) => ({
-    name: field.name,
-    ...Object.keys(surveyData.gender).reduce((acc, gender) => {
+  const averageSatisfactionByGender = Object.keys(surveyData.gender).map(
+    (gender) => {
       const relevantResults = surveyData.results.filter(
         (result: SurveyResult) => result.gender === gender
       );
       const totalScore = relevantResults.reduce(
-        (sum, result) => sum + parseInt(result[field.key], 10),
+        (sum, result) =>
+          sum +
+          satisfactionFields.reduce(
+            (fieldSum, field) => fieldSum + parseInt(result[field.key], 10),
+            0
+          ),
         0
       );
-      const averageScore =
-        relevantResults.length > 0 ? totalScore / relevantResults.length : 0;
+      const totalResponses = relevantResults.length * satisfactionFields.length;
       return {
-        ...acc,
-        [gender]: averageScore,
+        gender,
+        score: totalResponses > 0 ? totalScore / totalResponses : 0,
       };
-    }, {}),
-  }));
+    }
+  );
+
+  const averageSatisfactionByAgeAllDimensions = satisfactionFields.map(
+    (field) => ({
+      name: field.name,
+      ...ageData.reduce((acc, ageGroup) => {
+        const relevantResults = surveyData.results.filter(
+          (result: SurveyResult) => result.age === ageGroup.name
+        );
+        const totalScore = relevantResults.reduce(
+          (sum, result) => sum + parseInt(result[field.key], 10),
+          0
+        );
+        const averageScore =
+          relevantResults.length > 0 ? totalScore / relevantResults.length : 0;
+        return {
+          ...acc,
+          [ageGroup.name]: averageScore,
+        };
+      }, {}),
+    })
+  );
+
+  const averageSatisfactionByGenderAllDimensions = satisfactionFields.map(
+    (field) => ({
+      name: field.name,
+      ...Object.keys(surveyData.gender).reduce((acc, gender) => {
+        const relevantResults = surveyData.results.filter(
+          (result: SurveyResult) => result.gender === gender
+        );
+        const totalScore = relevantResults.reduce(
+          (sum, result) => sum + parseInt(result[field.key], 10),
+          0
+        );
+        const averageScore =
+          relevantResults.length > 0 ? totalScore / relevantResults.length : 0;
+        return {
+          ...acc,
+          [gender]: averageScore,
+        };
+      }, {}),
+    })
+  );
 
   return (
     <div className="container mx-auto p-4">
@@ -288,9 +334,45 @@ export default function DashboardPage() {
             <CardTitle>Average Satisfaction by Age Group</CardTitle>
           </CardHeader>
           <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={averageSatisfactionByAge}>
+                <XAxis dataKey="age" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="score" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Average Satisfaction by Gender</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={averageSatisfactionByGender}>
+                <XAxis dataKey="gender" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="score" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Average Satisfaction by Age Group (All Dimensions)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart
-                data={averageSatisfactionByAge}
+                data={averageSatisfactionByAgeAllDimensions}
                 margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
                 <XAxis
@@ -318,12 +400,14 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Average Satisfaction by Gender</CardTitle>
+            <CardTitle>
+              Average Satisfaction by Gender (All Dimensions)
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart
-                data={averageSatisfactionByGender}
+                data={averageSatisfactionByGenderAllDimensions}
                 margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
                 <XAxis
