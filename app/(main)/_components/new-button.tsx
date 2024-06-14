@@ -11,7 +11,7 @@ export const NewButton = () => {
   return (
     <Dialog>
       <DialogTrigger asChild className="btn btn-primary">
-        <Item label="Create a Teamspace" icon={UserPlus2Icon} />
+        <Item label="Create Organization" icon={UserPlus2Icon} />
       </DialogTrigger>
       <DialogContent className="p-0 border-none max-w-[480px] text-black">
         <CreateOrganization afterCreateOrganizationUrl="/documents" />
