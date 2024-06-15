@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { CheckIcon } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -10,6 +9,13 @@ import { useAction } from "convex/react";
 import { toast } from "sonner";
 import { SignInButton } from "@clerk/clerk-react";
 import { Spinner } from "@/components/spinner";
+import {
+  CheckCircle,
+  CheckCircle2Icon,
+  CheckCircleIcon,
+  CheckSquare,
+} from "lucide-react";
+import { CheckboxItem } from "@radix-ui/react-dropdown-menu";
 
 export default function Pricing() {
   const { user, isLoaded: isUserLoaded } = useUser();
@@ -73,15 +79,11 @@ export default function Pricing() {
             </div>
             <ul className="space-y-4 text-gray-500 dark:text-gray-400 mb-8">
               <li className="flex items-center">
-                <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Unlimited private documents
+                <CheckCircle2Icon className="mr-2 h-6 w-6 text-green-500/90" />2
+                notes per team
               </li>
               <li className="flex items-center">
-                <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Limit of 2 documents per team
-              </li>
-              <li className="flex items-center">
-                <CheckIcon className="mr-2 h-6 w-6 fill-current" />
+                <CheckCircle2Icon className="mr-2 h-6 w-6 text-green-500/90" />
                 Basic AI Assistance
               </li>
               <li className="h-6"></li> {/* Spacer */}
@@ -107,19 +109,15 @@ export default function Pricing() {
             </div>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center">
-                <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Unlimited private documents
+                <CheckCircle className="mr-2 h-6 w-6 text-green-500" />
+                Unlimited team notes
               </li>
               <li className="flex items-center">
-                <CheckIcon className="mr-2 h-6 w-6 fill-current" />
-                Unlimited team documents
-              </li>
-              <li className="flex items-center">
-                <CheckIcon className="mr-2 h-6 w-6 fill-current" />
+                <CheckCircle className="mr-2 h-6 w-6 text-green-500" />
                 All AI Features
               </li>
               <li className="flex items-center">
-                <CheckIcon className="mr-2 h-6 w-6 fill-current" />
+                <CheckCircle className="mr-2 h-6 w-6 text-green-500" />
                 Priority support
               </li>
             </ul>
