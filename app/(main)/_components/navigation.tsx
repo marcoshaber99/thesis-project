@@ -1,20 +1,22 @@
 "use client";
 
-import { useOrganization } from "@clerk/nextjs";
-
 import {
+  Book,
   ChevronsLeft,
-  LockIcon,
+  HomeIcon,
+  Lock,
   MenuIcon,
   Plus,
   PlusCircle,
   Search,
   Settings,
   Trash,
+  Users,
 } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
+import { useQuery } from "convex/react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
 
@@ -28,19 +30,31 @@ import {
 import { useSearch } from "@/hooks/use-search";
 import { useSettings } from "@/hooks/use-settings";
 
+import { useOrganizationList } from "@clerk/nextjs";
+
+import { OrganizationSwitcher } from "@clerk/nextjs";
 import { UserItem } from "./user-item";
 import { Item } from "./item";
 import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
 import { Navbar } from "./navbar";
 import { NewButton } from "./new-button";
-import { List } from "./list";
-import { ManageOrganizations } from "./manage-org";
+import { useUser } from "@clerk/clerk-react";
+import { useAction } from "convex/react";
+import { useProModal } from "@/hooks/use-pro-modal";
+import { useApiMutation } from "@/hooks/use-api-mutation";
 
 export const Navigation = () => {
+  const { userMemberships } = useOrganizationList({
+    userMemberships: {
+      infinite: true,
+    },
+  });
   const router = useRouter();
   const settings = useSettings();
-  const { organization } = useOrganization();
+
+  const { onOpen } = useProModal();
+  const { mutate, pending } = useApiMutation(api.documents.create);
 
   const search = useSearch();
   const params = useParams();
@@ -53,7 +67,6 @@ export const Navigation = () => {
   const navbarRef = useRef<ElementRef<"div">>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
-  const { invitations, isLoaded } = useOrganization({ invitations: {} });
 
   useEffect(() => {
     if (isMobile) {
@@ -130,17 +143,49 @@ export const Navigation = () => {
     }
   };
 
-  const handleCreate = () => {
-    const promise = create({ title: "Untitled" }).then((documentId) =>
-      router.push(`/documents/${documentId}`)
-    );
-
-    toast.promise(promise, {
-      loading: "Creating a new note...",
-      success: "New note created!",
-      error: "Failed to create a new note.",
-    });
+  const handleCreate = (organizationId?: string) => {
+    mutate({
+      title: "Untitled",
+      organizationId: organizationId || undefined,
+    })
+      .then((documentId) => {
+        if (documentId) {
+          toast.success("New note created!");
+          router.push(`/documents/${documentId}`);
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to create a new note");
+        onOpen();
+      });
   };
+
+  const { user } = useUser();
+  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
+    userId: user?.id || "",
+  });
+
+  const pay = useAction(api.stripe.pay);
+  const portal = useAction(api.stripe.portal);
+  const [portalPending, setPortalPending] = useState(false);
+
+  const handleUpgrade = async () => {
+    if (!user?.id) return;
+    setPortalPending(true);
+    try {
+      const action = isSubscribed ? portal : pay;
+      const redirectUrl = await action({
+        userId: user.id,
+      });
+      window.location.href = redirectUrl;
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setPortalPending(false);
+    }
+  };
+  const hasOrganizations =
+    userMemberships?.data && userMemberships.data.length > 0;
 
   return (
     <>
@@ -166,19 +211,60 @@ export const Navigation = () => {
           <UserItem />
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
           <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
-          <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
           <NewButton />
-          <ManageOrganizations />
-          {organization && (
-            <>
-              <List />
-            </>
-          )}
+          <Item
+            onClick={() => handleCreate()}
+            label="New page"
+            icon={PlusCircle}
+          />
+
+          <OrganizationSwitcher
+            hidePersonal
+            afterCreateOrganizationUrl="/documents"
+            afterLeaveOrganizationUrl="/documents"
+            createOrganizationMode="modal"
+            organizationProfileMode="modal"
+            appearance={{
+              elements: {
+                rootBox: {
+                  marginLeft: "1px",
+                },
+                organizationSwitcherTrigger:
+                  "w-full px-3 py-2 rounded-md border border-border justify-between bg-secondary text-secondary-foreground mb-3 mt-2 dark:bg-muted dark:text-muted-foreground dark:border-muted",
+              },
+            }}
+          />
         </div>
+        {hasOrganizations && (
+          <>
+            <Item
+              label="Organizations"
+              icon={HomeIcon}
+              className="dark:text-emerald-100/70"
+            />
+            {userMemberships?.data?.map((mem) => (
+              <div key={mem.organization.id} className="ml-1">
+                <Item label={mem.organization.name} icon={Users} />
+                <DocumentList organizationId={mem.organization.id} />
+                <Item
+                  onClick={() => handleCreate(mem.organization.id)}
+                  icon={Plus}
+                  label="Add a page"
+                />
+              </div>
+            ))}
+          </>
+        )}
         <div className="mt-4">
-          <Item label="Private" icon={LockIcon} />
-          <DocumentList />
-          <Item onClick={handleCreate} icon={Plus} label="Add a page" />
+          <div>
+            <Item
+              label="Private"
+              icon={Lock}
+              className="dark:text-orange-100/70"
+            />
+          </div>
+          <DocumentList isPrivate />
+          <Item onClick={() => handleCreate()} icon={Plus} label="Add a page" />
           <Popover>
             <PopoverTrigger className="w-full mt-4">
               <Item label="Trash" icon={Trash} />
@@ -190,6 +276,13 @@ export const Navigation = () => {
               <TrashBox />
             </PopoverContent>
           </Popover>
+        </div>
+        <div className="mt-auto mb-4">
+          <Item
+            onClick={() => router.push("/docs/introduction")}
+            icon={Book}
+            label="Documentation"
+          />
         </div>
         <div
           onMouseDown={handleMouseDown}
@@ -205,7 +298,7 @@ export const Navigation = () => {
           isMobile && "left-0 w-full"
         )}
       >
-        {!!params.documentId ? (
+        {!!params?.documentId ? (
           <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
         ) : (
           <nav className="bg-transparent px-3 py-2 w-full">

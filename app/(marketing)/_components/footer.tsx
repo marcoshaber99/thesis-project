@@ -1,21 +1,34 @@
-import { Button } from "@/components/ui/button";
-import Logo from "./logo";
+import Link from "next/link";
 
-export const Footer = () => {
+interface FooterProps {
+  className?: string;
+}
+
+export default function Footer({ className }: FooterProps) {
   return (
-    <div className="flex items-center w-full p-6 bg-background z-50 dark:bg-[#1F1F1F]">
-      <Logo />
-      <div className="md:ml-auto w-full justify-between md:justify-end flex items-center gap-x-2 text-muted-foreground">
-        <Button variant="ghost" size="sm">
-          Documentation
-        </Button>
-        <Button variant="ghost" size="sm">
-          Privacy Policy
-        </Button>
-        <Button variant="ghost" size="sm">
-          Marco Haber
-        </Button>
+    <footer className={`py-12 mt-12 ${className}`}>
+      <div className="container mx-auto px-4 flex flex-col items-center justify-between">
+        <nav className="flex flex-wrap justify-center space-x-6 lg:space-x-10">
+          <Link
+            className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
+            href="/docs/getting-started"
+          >
+            Documentation
+          </Link>
+          <Link
+            className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
+            href="/survey"
+          >
+            Take Our Survey
+          </Link>
+          <Link
+            className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
+            href="/dashboard"
+          >
+            Analytics
+          </Link>
+        </nav>
       </div>
-    </div>
+    </footer>
   );
-};
+}

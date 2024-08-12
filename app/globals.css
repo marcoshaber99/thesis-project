@@ -1,3 +1,24 @@
+@import "@liveblocks/react-comments/styles.css";
+@import "@liveblocks/react-comments/styles/dark/attributes.css";
+
+.lb-button {
+  color: #5f5f5f;
+}
+
+.lb-root {
+  --lb-accent: #44f;
+}
+
+.lb-icon {
+  padding: 1px;
+  border-radius: 0.25rem;
+}
+
+.lb-icon:hover {
+  background-color: var(--lb-accent);
+  color: white;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

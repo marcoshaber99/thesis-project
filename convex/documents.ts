@@ -3,6 +3,8 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 
+const ORGANIZATION_DOCUMENT_LIMIT = 2;
+
 export const archive = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
@@ -20,7 +22,10 @@ export const archive = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -54,20 +59,25 @@ export const archive = mutation({
 export const getSidebar = query({
   args: {
     parentDocument: v.optional(v.id("documents")),
+    organizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
     const userId = identity.subject;
 
     const documents = await ctx.db
       .query("documents")
-      .withIndex("by_user_parent", (q) =>
-        q.eq("userId", userId).eq("parentDocument", args.parentDocument)
+      .withIndex(
+        args.organizationId ? "by_organization_parent" : "by_user_parent",
+        (q) =>
+          args.organizationId
+            ? q
+                .eq("organizationId", args.organizationId)
+                .eq("parentDocument", args.parentDocument)
+            : q.eq("userId", userId).eq("parentDocument", args.parentDocument)
       )
       .filter((q) => q.eq(q.field("isArchived"), false))
       .order("desc")
@@ -81,15 +91,46 @@ export const create = mutation({
   args: {
     title: v.string(),
     parentDocument: v.optional(v.id("documents")),
+    organizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
 
     const userId = identity.subject;
+    let organizationId = args.organizationId;
+
+    if (args.parentDocument) {
+      const parentDocument = await ctx.db.get(args.parentDocument);
+      if (parentDocument) {
+        organizationId = parentDocument.organizationId || organizationId;
+      }
+    }
+
+    const userSubscription = await ctx.db
+      .query("userSubscription")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    const periodEnd = userSubscription?.stripeCurrentPeriodEnd;
+    const isSubscribed = periodEnd && periodEnd > Date.now();
+
+    if (organizationId && !isSubscribed) {
+      const documents = await ctx.db
+        .query("documents")
+        .withIndex("by_organization", (q) =>
+          q.eq("organizationId", organizationId)
+        )
+        .filter((q) => q.eq(q.field("isArchived"), false))
+        .collect();
+
+      const documentCount = documents.length;
+      if (documentCount >= ORGANIZATION_DOCUMENT_LIMIT) {
+        throw new Error("ORGANIZATION_DOCUMENT_LIMIT_REACHED");
+      }
+    }
 
     const document = await ctx.db.insert("documents", {
       title: args.title,
@@ -97,27 +138,23 @@ export const create = mutation({
       userId,
       isArchived: false,
       isPublished: false,
+      organizationId,
     });
 
     return document;
   },
 });
-
 export const getTrash = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
 
-    const userId = identity.subject;
-
+    // Fetch all archived documents
     const documents = await ctx.db
       .query("documents")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("isArchived"), true))
-      .order("desc")
       .collect();
 
     return documents;
@@ -141,7 +178,10 @@ export const restore = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -185,25 +225,14 @@ export const remove = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
-    const userId = identity.subject;
-
     const existingDocument = await ctx.db.get(args.id);
-
     if (!existingDocument) {
       throw new Error("Not found");
     }
-
-    if (existingDocument.userId !== userId) {
-      throw new Error("Unauthorized");
-    }
-
     const document = await ctx.db.delete(args.id);
-
     return document;
   },
 });
@@ -218,11 +247,10 @@ export const getSearch = query({
 
     const userId = identity.subject;
 
+    // Fetch all documents that are not archived
     const documents = await ctx.db
       .query("documents")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("isArchived"), false))
-      .order("desc")
       .collect();
 
     return documents;
@@ -230,7 +258,10 @@ export const getSearch = query({
 });
 
 export const getById = query({
-  args: { documentId: v.id("documents") },
+  args: {
+    documentId: v.id("documents"),
+    organizationId: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
@@ -248,9 +279,11 @@ export const getById = query({
       throw new Error("Not authenticated");
     }
 
+    console.log(document.organizationId);
+
     const userId = identity.subject;
 
-    if (document.userId !== userId) {
+    if (!document.organizationId && document.userId !== userId) {
       throw new Error("Unauthorized");
     }
 
@@ -266,6 +299,7 @@ export const update = mutation({
     coverImage: v.optional(v.string()),
     icon: v.optional(v.string()),
     isPublished: v.optional(v.boolean()),
+    organizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -284,7 +318,10 @@ export const update = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -313,7 +350,10 @@ export const removeIcon = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -342,13 +382,25 @@ export const removeCoverImage = mutation({
       throw new Error("Not found");
     }
 
-    if (existingDocument.userId !== userId) {
+    if (
+      !existingDocument.organizationId &&
+      existingDocument.userId !== userId
+    ) {
       throw new Error("Unauthorized");
     }
 
     const document = await ctx.db.patch(args.id, {
       coverImage: undefined,
     });
+
+    return document;
+  },
+});
+
+export const get = query({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    const document = ctx.db.get(args.id);
 
     return document;
   },

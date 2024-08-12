@@ -12,6 +12,10 @@ import { Banner } from "./banner";
 import { Menu } from "./menu";
 import { Publish } from "./publish";
 
+import { Participants } from "./participants";
+import { Room } from "@/components/room";
+import Loading from "../(routes)/documents/[documentId]/loading";
+
 interface NavbarProps {
   isCollapsed: boolean;
   onResetWidth: () => void;
@@ -19,9 +23,8 @@ interface NavbarProps {
 
 export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
   const params = useParams();
-
   const document = useQuery(api.documents.getById, {
-    documentId: params.documentId as Id<"documents">,
+    documentId: params?.documentId as Id<"documents">,
   });
 
   if (document === undefined) {
@@ -39,25 +42,52 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
     return null;
   }
 
+  const isOrganizationDocument = !!document.organizationId;
+
   return (
     <>
-      <nav className="bg-background dark:bg-[#1F1F1F] px-3 py-2 w-full flex items-center gap-x-4">
-        {isCollapsed && (
-          <MenuIcon
-            role="button"
-            onClick={onResetWidth}
-            className="h-6 w-6 text-muted-foreground"
-          />
-        )}
-        <div className="flex items-center justify-between w-full">
-          <Title initialData={document} />
-          <div className="flex items-center gap-x-2">
-            <Publish initialData={document} />
-            <Menu documentId={document._id} />
+      {isOrganizationDocument ? (
+        <Room
+          roomId={params?.documentId as Id<"documents">}
+          fallback={<Loading />}
+        >
+          <nav className="bg-background dark:bg-[#1F1F1F] px-3 py-2 w-full flex items-center gap-x-4">
+            {isCollapsed && (
+              <MenuIcon
+                role="button"
+                onClick={onResetWidth}
+                className="h-6 w-6 text-muted-foreground"
+              />
+            )}
+            <div className="flex items-center justify-between w-full">
+              <Title initialData={document} />
+              <div className="flex items-center gap-x-2">
+                <Participants organizationId={document.organizationId} />
+                <Publish initialData={document} />
+                <Menu documentId={document._id} />
+              </div>
+            </div>
+          </nav>
+          {document.isArchived && <Banner documentId={document._id} />}
+        </Room>
+      ) : (
+        <nav className="bg-background dark:bg-[#1F1F1F] px-3 py-2 w-full flex items-center gap-x-4">
+          {isCollapsed && (
+            <MenuIcon
+              role="button"
+              onClick={onResetWidth}
+              className="h-6 w-6 text-muted-foreground"
+            />
+          )}
+          <div className="flex items-center justify-between w-full">
+            <Title initialData={document} />
+            <div className="flex items-center gap-x-2">
+              <Publish initialData={document} />
+              <Menu documentId={document._id} />
+            </div>
           </div>
-        </div>
-      </nav>
-      {document.isArchived && <Banner documentId={document._id} />}
+        </nav>
+      )}
     </>
   );
 };

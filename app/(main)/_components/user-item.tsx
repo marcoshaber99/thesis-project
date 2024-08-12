@@ -1,20 +1,24 @@
 "use client";
 
-import { ChevronsLeftRight } from "lucide-react";
+import { ChevronsLeftRight, Star } from "lucide-react";
 import { useUser, SignOutButton } from "@clerk/clerk-react";
-
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Badge } from "@/components/ui/badge";
 
 export const UserItem = () => {
   const { user } = useUser();
+  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
+    userId: user?.id || "",
+  });
 
   return (
     <DropdownMenu>
@@ -34,7 +38,6 @@ export const UserItem = () => {
           <ChevronsLeftRight className="rotate-90 ml-2 text-muted-foreground h-4 w-4" />
         </div>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent
         className="w-80"
         align="start"
@@ -56,6 +59,23 @@ export const UserItem = () => {
                 {user?.fullName}&apos;s Harmony
               </p>
             </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {isSubscribed ? (
+              <>
+                <Badge
+                  variant="outline"
+                  className="flex items-center gap-2 p-2 px-4"
+                >
+                  🚀
+                  <span className="text-sm">Pro Member</span>
+                </Badge>
+              </>
+            ) : (
+              <span className="text-sm font-medium text-muted-foreground">
+                Free Tier
+              </span>
+            )}
           </div>
         </div>
         <DropdownMenuSeparator />

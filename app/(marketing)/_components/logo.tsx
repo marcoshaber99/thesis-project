@@ -1,8 +1,11 @@
 import Image from "next/image";
-
 import { Poppins } from "next/font/google";
-
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useUser } from "@clerk/clerk-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Badge } from "@/components/ui/badge";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -10,6 +13,11 @@ const font = Poppins({
 });
 
 const Logo = () => {
+  const { user } = useUser();
+  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
+    userId: user?.id || "",
+  });
+
   return (
     <div className="hidden md:flex items-center gap-x-2">
       <Image
@@ -26,8 +34,17 @@ const Logo = () => {
         alt="Logo"
         className="hidden dark:block"
       />
-
-      <p className={cn("font-semibold", font.className)}>Harmony</p>
+      <Link className="text-2xl font-bold tracking-tight" href="/">
+        Harmony
+      </Link>
+      {isSubscribed && (
+        <Badge
+          className="text-sm font-medium dark:bg-sky-200/10"
+          variant="secondary"
+        >
+          Pro
+        </Badge>
+      )}
     </div>
   );
 };

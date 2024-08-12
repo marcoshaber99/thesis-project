@@ -11,9 +11,34 @@ export default defineSchema({
     coverImage: v.optional(v.string()),
     icon: v.optional(v.string()),
     isPublished: v.boolean(),
-    orgId: v.optional(v.string()),
+    organizationId: v.optional(v.string()),
   })
     .index("by_user", ["userId"])
     .index("by_user_parent", ["userId", "parentDocument"])
-    .index("by_organization", ["orgId"]),
+    .index("by_organization", ["organizationId"])
+    .index("by_organization_parent", ["organizationId", "parentDocument"]),
+
+  userSubscription: defineTable({
+    userId: v.string(),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.string(),
+    stripePriceId: v.string(),
+    stripeCurrentPeriodEnd: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_subscription", ["stripeSubscriptionId"]),
+
+  surveys: defineTable({
+    userId: v.optional(v.string()),
+    attractiveness: v.string(),
+    perspicuity: v.string(),
+    efficiency: v.string(),
+    dependability: v.string(),
+    stimulation: v.string(),
+    novelty: v.string(),
+    feedback: v.string(),
+    age: v.string(),
+    gender: v.string(),
+    createdAt: v.number(),
+  }),
 });

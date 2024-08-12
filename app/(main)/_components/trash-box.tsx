@@ -1,16 +1,15 @@
-"use client";
-
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { Search, Trash, Undo } from "lucide-react";
 import { toast } from "sonner";
-
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { useUser } from "@clerk/clerk-react";
+import { useOrganizationList } from "@clerk/nextjs";
 
 export const TrashBox = () => {
   const router = useRouter();
@@ -18,11 +17,26 @@ export const TrashBox = () => {
   const documents = useQuery(api.documents.getTrash);
   const restore = useMutation(api.documents.restore);
   const remove = useMutation(api.documents.remove);
-
   const [search, setSearch] = useState("");
+  const { user } = useUser();
+  const { userMemberships } = useOrganizationList({
+    userMemberships: { infinite: true },
+  });
 
-  const filteredDocuments = documents?.filter((document) => {
-    return document.title.toLowerCase().includes(search.toLowerCase());
+  // Filter documents based on user's ownership and organization membership
+  const filteredDocuments = documents?.filter((doc) => {
+    if (doc.userId === user?.id) {
+      // Include private documents belonging to the current user
+      return true;
+    } else if (
+      userMemberships?.data?.some(
+        (mem) => mem.organization.id === doc.organizationId
+      )
+    ) {
+      // Include documents belonging to the organizations the user is a part of
+      return true;
+    }
+    return false;
   });
 
   const onClick = (documentId: string) => {
@@ -44,15 +58,30 @@ export const TrashBox = () => {
   };
 
   const onRemove = (documentId: Id<"documents">) => {
-    const promise = remove({ id: documentId });
+    const document = documents?.find((doc) => doc._id === documentId);
+    if (!document) {
+      toast.error("Document not found.");
+      return;
+    }
 
+    // Check if the user is the owner of the document or a member of the organization
+    const isOwner = document.userId === user?.id;
+    const isMember = userMemberships?.data?.some(
+      (mem) => mem.organization.id === document.organizationId
+    );
+
+    if (!isOwner && !isMember) {
+      toast.error("Unauthorized to delete the document.");
+      return;
+    }
+
+    const promise = remove({ id: documentId });
     toast.promise(promise, {
       loading: "Deleting note...",
       success: "Note deleted!",
-      error: " Failed to delete note.",
+      error: "Failed to delete note.",
     });
-
-    if (params.documentId === documentId) {
+    if (params?.documentId === documentId) {
       router.push("/documents");
     }
   };

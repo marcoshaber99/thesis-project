@@ -36,6 +36,8 @@ interface ItemProps {
   label: string;
   onClick?: () => void;
   icon: LucideIcon;
+  organizationId?: string;
+  className?: string;
 }
 
 export const Item = ({
@@ -49,6 +51,8 @@ export const Item = ({
   level = 0,
   onExpand,
   expanded,
+  organizationId,
+  className,
 }: ItemProps) => {
   const { user } = useUser();
   const router = useRouter();
@@ -77,14 +81,16 @@ export const Item = ({
   const onCreate = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
     if (!id) return;
-    const promise = create({ title: "Untitled", parentDocument: id }).then(
-      (documentId) => {
-        if (!expanded) {
-          onExpand?.();
-        }
-        router.push(`/documents/${documentId}`);
+    const promise = create({
+      title: "Untitled",
+      parentDocument: id,
+      organizationId: organizationId || undefined,
+    }).then((documentId) => {
+      if (!expanded) {
+        onExpand?.();
       }
-    );
+      router.push(`/documents/${documentId}`);
+    });
 
     toast.promise(promise, {
       loading: "Creating a new note...",
@@ -104,7 +110,8 @@ export const Item = ({
       }}
       className={cn(
         "group min-h-[27px] text-sm py-1 pr-3 w-full hover:bg-primary/5 flex items-center text-muted-foreground font-medium",
-        active && "bg-primary/5 text-primary"
+        active && "bg-primary/5 text-primary",
+        className
       )}
     >
       {!!id && (
@@ -149,9 +156,6 @@ export const Item = ({
                 Delete
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <div className="text-xs text-muted-foreground p-2">
-                Last edited by: {user?.fullName}
-              </div>
             </DropdownMenuContent>
           </DropdownMenu>
           <div

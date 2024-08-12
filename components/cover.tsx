@@ -31,7 +31,7 @@ export const Cover = ({ url, preview }: CoverImageProps) => {
       });
     }
     removeCoverImage({
-      id: params.documentId as Id<"documents">,
+      id: params?.documentId as Id<"documents">,
     });
   };
 

@@ -58,9 +58,6 @@ export const Menu = ({ documentId }: MenuProps) => {
           Delete
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <div className="text-xs text-muted-foreground p-2">
-          Last edited by: {user?.fullName}
-        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
