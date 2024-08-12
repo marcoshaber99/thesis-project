@@ -1,16 +1,16 @@
 # Harmony
 
-![Project Logo](/public/logo-dark.svg)
+![Project Logo](/public/logo.png)
 
 Harmony is a modern note-taking and collaboration application that combines simplicity with powerful features.
 
-[![GitHub license](https://img.shields.io/github/license/yourusername/harmony.svg)](https://github.com/marcoshaber99/thesis-project/blob/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/harmony.svg)](https://github.com/marcoshaber99/thesis-project/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/harmony.svg)](https://github.com/marcoshaber99/thesis-project/issues)
+## 🖥️ Homepage
+
+![Harmony Homepage](/public/marketing.png)
 
 ## 🚀 Live Demo
 
-**[Experience Harmony](https://harmony-app.com)**
+**[Visit Harmony](https://harmony-theta.vercel.app)**
 
 ![Demo GIF](/public/collab-demo.gif)
 
@@ -59,11 +59,14 @@ Harmony is a modern note-taking and collaboration application that combines simp
 
 6. Open your browser and visit `http://localhost:3000`
 
+## 🤝 Contributing
+
+If you'd like to contribute, please fork the repository and open a pull request to the `main` branch.
+
+
 ## 📖 Documentation
 
 For more detailed information about using Harmony, please refer to the docs page [Docs](https://harmony-theta.vercel.app/docs/introduction).
-
-
 
 ## 📄 License
 
